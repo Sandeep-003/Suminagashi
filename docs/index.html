@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suminagashi - Digital Paper Marbling</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1a1a1a;
+      --bg-tertiary: #2a2a2a;
+      --text-primary: #ffffff;
+      --text-secondary: #b3b3b3;
+      --accent: #00d4ff;
+      --accent-hover: #00b8e6;
+      --success: #00ff88;
+      --warning: #ffb800;
+      --error: #ff4757;
+      --border: #333333;
+      --shadow: rgba(0, 212, 255, 0.2);
+      --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    .header {
+      background: rgba(26, 26, 26, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 2rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+
+    .logo i {
+      color: var(--accent);
+      font-size: 2rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+      font-weight: 500;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+
+    .github-link {
+      background: var(--accent);
+      color: var(--bg-primary) !important;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+
+    .github-link:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--shadow);
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-top: 80px;
+      min-height: calc(100vh - 160px);
+      padding: 2rem;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 4rem 0 2rem;
+      background: var(--gradient);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      -webkit-text-fill-color: var(--text-secondary);
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .btn:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg-primary);
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: var(--bg-primary);
+      border-color: var(--success);
+    }
+
+    .btn-success:hover {
+      background: #00e67a;
+      border-color: #00e67a;
+    }
+
+    /* Canvas Container */
+    .canvas-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .canvas-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient);
+    }
+
+    #canvas {
+      display: block;
+      margin: 0 auto;
+      border-radius: 8px;
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+      max-width: 100%;
+      height: auto;
+    }
+
+    .canvas-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Instructions */
+    .instructions {
+      max-width: 800px;
+      margin: 3rem auto;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .instructions-header {
+      background: var(--bg-tertiary);
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .instructions-header i {
+      color: var(--accent);
+    }
+
+    .instructions-content {
+      padding: 1.5rem;
+    }
+
+    .instruction-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: var(--bg-primary);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+
+    .instruction-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .instruction-icon {
+      color: var(--accent);
+      font-size: 1.2rem;
+      margin-top: 0.2rem;
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 2rem 0;
+      text-align: center;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent);
+    }
+
+    .footer-text {
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-content {
+        padding: 0 1rem;
+      }
+
+      .nav-links {
+        gap: 1rem;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+
+      .controls {
+        gap: 0.5rem;
+      }
+
+      .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+
+      .main-content {
+        padding: 1rem;
+      }
+    }
+
+    /* Loading animation */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      border: 3px solid var(--border);
+      border-top: 3px solid var(--accent);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast.success {
+      border-color: var(--success);
+    }
+
+    .toast.error {
+      border-color: var(--error);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">
+        <i class="fas fa-water"></i>
+        <span>Suminagashi</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#about">About</a>
+        <a href="#instructions">Instructions</a>
+        <a href="https://github.com/Sandeep-003" target="_blank" class="github-link">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1>Suminagashi</h1>
+      <p>Experience the ancient Japanese art of paper marbling in your browser. Create beautiful flowing patterns with dynamic color palettes.</p>
+    </section>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn btn-primary" onclick="clearCanvas()">
+        <i class="fas fa-eraser"></i> Clear Canvas
+      </button>
+      <button class="btn btn-success" onclick="saveScreenshot()">
+        <i class="fas fa-camera"></i> Save Screenshot
+      </button>
+      <button class="btn" onclick="toggleFullscreen()">
+        <i class="fas fa-expand"></i> Fullscreen
+      </button>
+      <button class="btn" onclick="showInfo()">
+        <i class="fas fa-info-circle"></i> Info
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Loading Suminagashi...</p>
+    </div>
+
+    <!-- Canvas Container -->
+    <div class="canvas-container">
+      <div class="canvas-info">
+        <div class="status-indicator">
+          <div class="status-dot"></div>
+          <span>Ready to create</span>
+        </div>
+        <div>
+          <span>Click to create drops • Each drop uses a random color palette</span>
+        </div>
+      </div>
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    </div>
+
+    <!-- Instructions -->
+    <section class="instructions" id="instructions">
+      <div class="instructions-header">
+        <i class="fas fa-graduation-cap"></i>
+        <h3>How to Create Art</h3>
+      </div>
+      <div class="instructions-content">
+        <div class="instruction-item">
+          <i class="fas fa-mouse-pointer instruction-icon"></i>
+          <div>
+            <strong>Click to Create Drops</strong>
+            <p>Click anywhere on the canvas to create a new drop. Each drop will use a randomly selected color from beautiful themed palettes.</p>
+          </div>
+        </div>
+        <div class="instruction-item">
+          <i class="fas fa-palette instruction-icon"></i>
+          <div>
+            <strong>Dynamic Color Palettes</strong>
+            <p>Enjoy 15 carefully curated color palettes including Sunset, Ocean, Traditional Japanese, Turkish Ebru, and more artistic themes.</p>
+          </div>
+        </div>
+        <div class="instruction-item">
+          <i class="fas fa-magic instruction-icon"></i>
+          <div>
+            <strong>Watch the Magic</strong>
+            <p>Each new drop interacts with existing ones, creating beautiful marbling effects inspired by traditional suminagashi techniques.</p>
+          </div>
+        </div>
+        <div class="instruction-item">
+          <i class="fas fa-save instruction-icon"></i>
+          <div>
+            <strong>Save Your Art</strong>
+            <p>Use the "Save Screenshot" button to download your creation as a PNG image to your device.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="https://github.com/Sandeep-003" target="_blank">
+          <i class="fab fa-github"></i> GitHub Profile
+        </a>
+        <a href="https://github.com/Sandeep-003/Computer-Graphics" target="_blank">
+          <i class="fas fa-code-branch"></i> Source Code
+        </a>
+        <a href="#" onclick="showAbout()">
+          <i class="fas fa-info"></i> About
+        </a>
+      </div>
+      <p class="footer-text">
+        Made with ❤️ by Sandeep • Built with C++, Raylib & Emscripten
+      </p>
+    </div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <i class="fas fa-check"></i>
+    <span id="toast-message">Screenshot saved!</span>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    var Module = {
+      print: (function() {
+        var element = document.getElementById('output');
+        if (element) element.value = '';
+        return function(text) {
+          if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+          console.log(text);
+          if (element) {
+            element.value += text + "\n";
+            element.scrollTop = element.scrollHeight;
+          }
+        };
+      })(),
+      canvas: (function() {
+        var canvas = document.getElementById('canvas');
+        return canvas;
+      })(),
+      locateFile: function(path) {
+        if (path.endsWith('.wasm')) {
+          return 'suminasashi.wasm';
+        }
+        return path;
+      },
+      onRuntimeInitialized: function() {
+        document.getElementById('loading').style.display = 'none';
+        showToast('Suminagashi loaded successfully!', 'success');
+      },
+      // WebGL context attributes for preserving drawing buffer
+      preinitializedWebGLContext: null,
+      webglContextAttributes: {
+        preserveDrawingBuffer: true,
+        antialias: true,
+        alpha: true
+      }
+    };
+
+    // Show loading initially
+    document.getElementById('loading').style.display = 'block';
+
+    // Screenshot functionality
+    function saveScreenshot() {
+      const canvas = document.getElementById('canvas');
+      
+      // Check if canvas has content
+      if (!canvas.getContext) {
+        showToast('Canvas not supported', 'error');
+        return;
+      }
+
+      try {
+        // For WebGL canvas, we need to read pixels directly
+        const gl = canvas.getContext('webgl') || canvas.getContext('webgl2') || canvas.getContext('experimental-webgl');
+        
+        if (gl) {
+          // Create a temporary canvas to draw the WebGL content
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = canvas.height;
+          const tempCtx = tempCanvas.getContext('2d');
+          
+          // Read pixels from WebGL
+          const pixels = new Uint8Array(gl.drawingBufferWidth * gl.drawingBufferHeight * 4);
+          gl.readPixels(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+          
+          // Create ImageData and flip vertically (WebGL is upside down)
+          const imageData = tempCtx.createImageData(gl.drawingBufferWidth, gl.drawingBufferHeight);
+          for (let y = 0; y < gl.drawingBufferHeight; y++) {
+            for (let x = 0; x < gl.drawingBufferWidth; x++) {
+              const srcIndex = (y * gl.drawingBufferWidth + x) * 4;
+              const dstIndex = ((gl.drawingBufferHeight - y - 1) * gl.drawingBufferWidth + x) * 4;
+              imageData.data[dstIndex] = pixels[srcIndex];         // R
+              imageData.data[dstIndex + 1] = pixels[srcIndex + 1]; // G
+              imageData.data[dstIndex + 2] = pixels[srcIndex + 2]; // B
+              imageData.data[dstIndex + 3] = pixels[srcIndex + 3]; // A
+            }
+          }
+          
+          tempCtx.putImageData(imageData, 0, 0);
+          
+          // Create download link
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+          const filename = `suminagashi-${timestamp}.png`;
+          
+          tempCanvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(url);
+            showToast(`Screenshot saved as ${filename}`, 'success');
+          }, 'image/png');
+          
+        } else {
+          // Fallback for 2D canvas
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+          const filename = `suminagashi-${timestamp}.png`;
+          
+          canvas.toBlob(function(blob) {
+            if (blob && blob.size > 0) {
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = filename;
+              link.click();
+              URL.revokeObjectURL(url);
+              showToast(`Screenshot saved as ${filename}`, 'success');
+            } else {
+              showToast('Canvas is empty or not ready', 'error');
+            }
+          }, 'image/png');
+        }
+      } catch (error) {
+        console.error('Screenshot error:', error);
+        showToast('Failed to capture screenshot', 'error');
+      }
+    }
+
+    // Clear canvas function (if available in your C++ code)
+    function clearCanvas() {
+      // This would need to be implemented in your C++ code
+      // For now, just show a message
+      showToast('Clear canvas feature - implement in C++ code', 'error');
+    }
+
+    // Fullscreen toggle
+    function toggleFullscreen() {
+      const canvas = document.getElementById('canvas');
+      if (!document.fullscreenElement) {
+        canvas.requestFullscreen().catch(err => {
+          showToast('Fullscreen not supported', 'error');
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Show info
+    function showInfo() {
+      const instructions = document.getElementById('instructions');
+      instructions.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Show about
+    function showAbout() {
+      alert('Suminagashi - Digital Paper Marbling\\n\\nAn interactive web application that recreates the ancient Japanese art of suminagashi (paper marbling) using modern web technologies.\\n\\nBuilt with C++, Raylib, and compiled to WebAssembly using Emscripten.');
+    }
+
+    // Toast notification system
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toast-message');
+      const icon = toast.querySelector('i');
+      
+      toastMessage.textContent = message;
+      toast.className = `toast ${type}`;
+      
+      if (type === 'success') {
+        icon.className = 'fas fa-check';
+      } else if (type === 'error') {
+        icon.className = 'fas fa-times';
+      }
+      
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Header scroll effect
+    window.addEventListener('scroll', () => {
+      const header = document.querySelector('.header');
+      if (window.scrollY > 100) {
+        header.style.background = 'rgba(26, 26, 26, 0.98)';
+      } else {
+        header.style.background = 'rgba(26, 26, 26, 0.95)';
+      }
+    });
+
+    // Prevent right-click context menu on canvas
+    document.getElementById('canvas').addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      return false;
+    });
+  </script>
+  <script async src="suminasashi.js"></script>
+</body>
+</html>
