@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Suminagashi - Digital Paper Marbling</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
@@ -247,8 +250,15 @@
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
     }
 
     /* Instructions */
@@ -384,8 +394,13 @@
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     /* Toast notification */
@@ -420,6 +435,7 @@
     }
   </style>
 </head>
+
 <body>
   <!-- Header -->
   <header class="header">
@@ -443,7 +459,8 @@
     <!-- Hero Section -->
     <section class="hero">
       <h1>Suminagashi</h1>
-      <p>Experience the ancient Japanese art of paper marbling in your browser. Create beautiful flowing patterns with dynamic color palettes.</p>
+      <p>Experience the ancient Japanese art of paper marbling in your browser. Create beautiful flowing patterns with
+        dynamic color palettes.</p>
     </section>
 
     <!-- Controls -->
@@ -493,21 +510,24 @@
           <i class="fas fa-mouse-pointer instruction-icon"></i>
           <div>
             <strong>Click to Create Drops</strong>
-            <p>Click anywhere on the canvas to create a new drop. Each drop will use a randomly selected color from beautiful themed palettes.</p>
+            <p>Click anywhere on the canvas to create a new drop. Each drop will use a randomly selected color from
+              beautiful themed palettes.</p>
           </div>
         </div>
         <div class="instruction-item">
           <i class="fas fa-palette instruction-icon"></i>
           <div>
             <strong>Dynamic Color Palettes</strong>
-            <p>Enjoy 15 carefully curated color palettes including Sunset, Ocean, Traditional Japanese, Turkish Ebru, and more artistic themes.</p>
+            <p>Enjoy 15 carefully curated color palettes including Sunset, Ocean, Traditional Japanese, Turkish Ebru,
+              and more artistic themes.</p>
           </div>
         </div>
         <div class="instruction-item">
           <i class="fas fa-magic instruction-icon"></i>
           <div>
             <strong>Watch the Magic</strong>
-            <p>Each new drop interacts with existing ones, creating beautiful marbling effects inspired by traditional suminagashi techniques.</p>
+            <p>Each new drop interacts with existing ones, creating beautiful marbling effects inspired by traditional
+              suminagashi techniques.</p>
           </div>
         </div>
         <div class="instruction-item">
@@ -550,10 +570,10 @@
   <!-- JavaScript -->
   <script>
     var Module = {
-      print: (function() {
+      print: (function () {
         var element = document.getElementById('output');
         if (element) element.value = '';
-        return function(text) {
+        return function (text) {
           if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
           console.log(text);
           if (element) {
@@ -562,17 +582,17 @@
           }
         };
       })(),
-      canvas: (function() {
+      canvas: (function () {
         var canvas = document.getElementById('canvas');
         return canvas;
       })(),
-      locateFile: function(path) {
+      locateFile: function (path) {
         if (path.endsWith('.wasm')) {
           return 'suminasashi.wasm';
         }
         return path;
       },
-      onRuntimeInitialized: function() {
+      onRuntimeInitialized: function () {
         document.getElementById('loading').style.display = 'none';
         showToast('Suminagashi loaded successfully!', 'success');
       },
@@ -590,88 +610,45 @@
 
     // Screenshot functionality
     function saveScreenshot() {
-      const canvas = document.getElementById('canvas');
-      
-      // Check if canvas has content
-      if (!canvas.getContext) {
-        showToast('Canvas not supported', 'error');
-        return;
-      }
-
-      try {
-        // For WebGL canvas, we need to read pixels directly
-        const gl = canvas.getContext('webgl') || canvas.getContext('webgl2') || canvas.getContext('experimental-webgl');
-        
-        if (gl) {
-          // Create a temporary canvas to draw the WebGL content
-          const tempCanvas = document.createElement('canvas');
-          tempCanvas.width = canvas.width;
-          tempCanvas.height = canvas.height;
-          const tempCtx = tempCanvas.getContext('2d');
-          
-          // Read pixels from WebGL
-          const pixels = new Uint8Array(gl.drawingBufferWidth * gl.drawingBufferHeight * 4);
-          gl.readPixels(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-          
-          // Create ImageData and flip vertically (WebGL is upside down)
-          const imageData = tempCtx.createImageData(gl.drawingBufferWidth, gl.drawingBufferHeight);
-          for (let y = 0; y < gl.drawingBufferHeight; y++) {
-            for (let x = 0; x < gl.drawingBufferWidth; x++) {
-              const srcIndex = (y * gl.drawingBufferWidth + x) * 4;
-              const dstIndex = ((gl.drawingBufferHeight - y - 1) * gl.drawingBufferWidth + x) * 4;
-              imageData.data[dstIndex] = pixels[srcIndex];         // R
-              imageData.data[dstIndex + 1] = pixels[srcIndex + 1]; // G
-              imageData.data[dstIndex + 2] = pixels[srcIndex + 2]; // B
-              imageData.data[dstIndex + 3] = pixels[srcIndex + 3]; // A
-            }
-          }
-          
-          tempCtx.putImageData(imageData, 0, 0);
-          
-          // Create download link
-          const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-          const filename = `suminagashi-${timestamp}.png`;
-          
-          tempCanvas.toBlob(function(blob) {
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
+      if (typeof Module !== 'undefined' && typeof Module.ccall === 'function') {
+        Module.ccall('takeScreenshot', null, [], []);
+        showToast('Screenshot saved!', 'success');
+        setTimeout(function () {
+          var filename = 'suminagashi_screenshot.png';
+          if (Module.FS && Module.FS.findObject(filename)) {
+            var data = Module.FS.readFile(filename, { encoding: 'binary' });
+            var blob = new Blob([data], { type: 'image/png' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
             link.download = filename;
             link.click();
-            URL.revokeObjectURL(url);
-            showToast(`Screenshot saved as ${filename}`, 'success');
-          }, 'image/png');
-          
-        } else {
-          // Fallback for 2D canvas
-          const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-          const filename = `suminagashi-${timestamp}.png`;
-          
-          canvas.toBlob(function(blob) {
-            if (blob && blob.size > 0) {
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = filename;
-              link.click();
-              URL.revokeObjectURL(url);
-              showToast(`Screenshot saved as ${filename}`, 'success');
-            } else {
-              showToast('Canvas is empty or not ready', 'error');
-            }
-          }, 'image/png');
-        }
-      } catch (error) {
-        console.error('Screenshot error:', error);
-        showToast('Failed to capture screenshot', 'error');
+            URL.revokeObjectURL(link.href);
+          } else {
+            showToast('Screenshot file not found', 'error');
+          }
+        }, 500); // Wait 500ms for file to be written
+      } else {
+        showToast('Screenshot feature not available', 'error');
       }
+      
+      /*
+      1 vulnerability
+        path-injection Unvalidated input in path value creation risks unintended file/directory access
+      */
     }
+    // `suminagashi-${timestamp}.png`;
+    // Check if canvas has content
+
 
     // Clear canvas function (if available in your C++ code)
     function clearCanvas() {
-      // This would need to be implemented in your C++ code
-      // For now, just show a message
-      showToast('Clear canvas feature - implement in C++ code', 'error');
+      // Call the C++ clearCanvas function via Emscripten
+      if (typeof Module !== 'undefined' && typeof Module.ccall === 'function') {
+        Module.ccall('clearCanvas', null, [], []);
+        showToast('Canvas cleared!', 'success');
+      } else {
+        showToast('Clear canvas feature not available', 'error');
+      }
     }
 
     // Fullscreen toggle
@@ -702,18 +679,18 @@
       const toast = document.getElementById('toast');
       const toastMessage = document.getElementById('toast-message');
       const icon = toast.querySelector('i');
-      
+
       toastMessage.textContent = message;
       toast.className = `toast ${type}`;
-      
+
       if (type === 'success') {
         icon.className = 'fas fa-check';
       } else if (type === 'error') {
         icon.className = 'fas fa-times';
       }
-      
+
       toast.classList.add('show');
-      
+
       setTimeout(() => {
         toast.classList.remove('show');
       }, 3000);
@@ -730,12 +707,13 @@
     });
 
     // Prevent right-click context menu on canvas
-    document.getElementById('canvas').addEventListener('contextmenu', function(e) {
+    document.getElementById('canvas').addEventListener('contextmenu', function (e) {
       e.preventDefault();
       return false;
     });
   </script>
   <script async src="suminasashi.js"></script>
 </body>
+
 </html>
 <!-- hi -->
