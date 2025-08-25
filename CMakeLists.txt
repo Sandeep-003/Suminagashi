@@ -39,7 +39,8 @@ endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os")    
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sEXPORTED_FUNCTIONS=_display,_clearCanvas,_main -sEXPORTED_RUNTIME_METHODS=ccall")
+# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sEXPORTED_FUNCTIONS=['_display','_clearCanvas','_main','_takeScreenshot'] -sEXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sEXPORTED_FUNCTIONS=\"['_display','_clearCanvas','_main','_takeScreenshot']\" -sEXPORTED_RUNTIME_METHODS=\"['ccall','cwrap']\"")
 
 # Additional Emscripten flags for WebGL and screenshot support
 if(EMSCRIPTEN)

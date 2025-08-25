@@ -21,7 +21,7 @@ void Drop::Draw_drops()
     rlColor4ub(raylibColor.r, raylibColor.g, raylibColor.b, raylibColor.a);
 
     // Triangulate the polygon (assumes convex shape for simplicity)
-    for (int i = realCount-1; i >= 0; i--) {
+    for (int i = realCount-1; i > 0; i--) {
         rlVertex2f(this->center.x, this->center.y);       // First vertex
         rlVertex2f(vertices[i].x, vertices[i].y); // Third vertex
         rlVertex2f(vertices[(i-1+realCount)%realCount].x, vertices[(i-1+realCount)%realCount].y);      // Second vertex
@@ -47,7 +47,7 @@ void Drop::wavy_transformation()
     for (size_t i = 0; i < vertices.size(); ++i)
     {
         double angle = (2.0 * PI * i) / (vertices.size() - 1);
-        double wave = 10 * sin(5 * angle); // amplitude 10, frequency 5
+        double wave = 4 * sin(10 * angle); // amplitude 10, frequency 5
         vertices[i].x += wave * cos(angle);
         vertices[i].y += wave * sin(angle);
     }

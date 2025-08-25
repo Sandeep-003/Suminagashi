@@ -9,8 +9,9 @@ using namespace std;
 
 // Initialization
 //--------------------------------------------------------------------------------------
-const int screenWidth = 1200;
-const int screenHeight = 850;
+const int margin = 40;
+const int initialScreenWidth =  1200; // Default initial width
+const int initialScreenHeight =  800; // Default initial height
 const int N = 100;
 bool f = 0;
 vector<Drop> drops;
@@ -28,33 +29,37 @@ extern "C"
   {
     std::cout << "Hello sandeep ! I'm being executed by C++";
   }
-  extern "C" {
-    void clearCanvas() {
-        // Clear your drops vector and redraw
-        drops.clear();
+}
+extern "C" {
+    void takeScreenshot() {
+        TakeScreenshot("suminagashi_screenshot.png");
     }
 }
+extern "C"
+{
+  void clearCanvas()
+  {
+    // Clear your drops vector and redraw
+    drops.clear();
+  }
 }
 
 int main(void)
 {
+  // SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE);
+  InitWindow(initialScreenWidth, initialScreenHeight, "suminasashi");
 
-  SetConfigFlags(FLAG_MSAA_4X_HINT);
-  InitWindow(screenWidth, screenHeight, "suminasashi");
-  
-  // draw();
-  
   SetTargetFPS(60); // Set our game to run at 60 frames-per-second
   emscripten_set_main_loop(draw, 0, 1);
   close();
 }
 
 
-
 void draw()
 {
+
   BeginDrawing();
-  ClearBackground(RAYWHITE); 
+  ClearBackground(RAYWHITE);
 
   if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
   {
@@ -70,6 +75,7 @@ void draw()
     for (size_t i = 0; i < drops.size(); i++)
     {
       drops[i].marble(d);
+      // drops[i].wavy_transformation();
     }
 
     drops.push_back(d);
@@ -79,6 +85,9 @@ void draw()
   {
     drops[i].Draw_drops();
   }
+
+  // Optionally, draw something that adapts to screenWidth/screenHeight
+  // Example: DrawRectangle(margin, margin, screenWidth - 2*margin, screenHeight - 2*margin, LIGHTGRAY);
 
   EndDrawing();
 }
