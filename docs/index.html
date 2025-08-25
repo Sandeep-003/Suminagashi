@@ -433,6 +433,41 @@
     .toast.error {
       border-color: var(--error);
     }
+
+    /* Gallery */
+    .gallery-section {
+      max-width: 1200px;
+      margin: 4rem auto 2rem;
+      padding: 1.5rem 1rem 2rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .gallery-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .gallery-header i { color: var(--accent); }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .gallery-item { position: relative; overflow: hidden; border-radius: 10px; border:1px solid var(--border); background: var(--bg-tertiary); }
+    .gallery-item img { width:100%; height:100%; object-fit:cover; display:block; transition: transform .6s ease, opacity .3s; }
+    .gallery-item:hover img { transform: scale(1.08); }
+    .gallery-item::after { content:''; position:absolute; inset:0; box-shadow: inset 0 0 0 0 rgba(0,0,0,0.4); transition: box-shadow .4s; }
+    .gallery-item:hover::after { box-shadow: inset 0 0 0 4px var(--accent); }
+    .gallery-empty { text-align:center; color: var(--text-secondary); font-size: .9rem; font-style: italic; padding:1rem 0; }
+    .gallery-note { margin-top:1rem; font-size:.75rem; color: var(--text-secondary); text-align:right; font-family:'JetBrains Mono', monospace; }
+    @media (max-width:600px){ .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); } }
   </style>
 </head>
 
@@ -446,6 +481,7 @@
       </div>
       <nav class="nav-links">
         <a href="#about">About</a>
+  <a href="#gallery">Gallery</a>
         <a href="#instructions">Instructions</a>
         <a href="https://github.com/Sandeep-003/Suminagashi/" target="_blank" class="github-link">
           <i class="fab fa-github"></i> GitHub
@@ -498,6 +534,17 @@
       </div>
       <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
     </div>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="gallery-section">
+      <div class="gallery-header">
+        <i class="fas fa-images"></i>
+        <h3 style="margin:0;">Gallery</h3>
+      </div>
+      <div id="gallery-grid" class="gallery-grid" aria-live="polite"></div>
+      <div id="gallery-empty" class="gallery-empty" style="display:none;">No images found. Place files inside <code>docs/Gallery/</code>.</div>
+      <div class="gallery-note">Click images to open full size in a new tab.</div>
+    </section>
 
     <!-- Instructions -->
     <section class="instructions" id="instructions">
@@ -630,7 +677,7 @@
       } else {
         showToast('Screenshot feature not available', 'error');
       }
-      
+
       /*
       1 vulnerability
         path-injection Unvalidated input in path value creation risks unintended file/directory access
@@ -711,6 +758,51 @@
       e.preventDefault();
       return false;
     });
+
+    /* ---------------- Gallery Loader ----------------
+       Provide a list of image filenames located in docs/Gallery/.
+       Add or remove entries below to control what appears.
+       This avoids needing to enumerate the filesystem at runtime. */
+    // Gallery configuration
+    const galleryBasePath = "Gallery/"; // images live in sibling Gallery folder relative to docs/
+    // Explicit files provided by user (names kept as-is; spaces will be URI-encoded automatically)
+    const explicitFiles = [
+      'image.png',
+      'image01.png',
+      'Screenshot 2024-05-25 205720.png',
+      'Screenshot 2025-08-26 005601.png'
+    ];
+    // Generate numbered sequence for pattern PaperMarbling###.png (assume 1..20). Adjust end if more/less.
+    const paperMarblingSequence = (() => {
+      const arr = [];
+      for (let i = 1; i <= 2; i++) {
+        arr.push(`PaperMarbling${String(i).padStart(3,'0')}.png`);
+      }
+      return arr;
+    })();
+    const galleryImages = [...explicitFiles, ...paperMarblingSequence];
+
+    function initGallery() {
+      const grid = document.getElementById('gallery-grid');
+      const emptyMsg = document.getElementById('gallery-empty');
+      if (!galleryImages.length) { emptyMsg.style.display = 'block'; return; }
+      emptyMsg.style.display = 'none';
+      galleryImages.forEach(name => {
+        const cleanName = name; // keep original for alt text
+        const url = galleryBasePath + encodeURI(name);
+        const item = document.createElement('a');
+        item.href = url;
+        item.target = '_blank';
+        item.className = 'gallery-item';
+        const img = document.createElement('img');
+        img.loading = 'lazy';
+        img.alt = cleanName;
+        img.src = url;
+        item.appendChild(img);
+        grid.appendChild(item);
+      });
+    }
+    document.addEventListener('DOMContentLoaded', initGallery);
   </script>
   <script async src="suminasashi.js"></script>
 </body>
