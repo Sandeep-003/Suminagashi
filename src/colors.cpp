@@ -8,9 +8,11 @@ bool ColorPalette::initialized = false;
 int ColorPalette::randSeed = 0;
 
 // Initialize predefined beautiful palettes
-void ColorPalette::initializePalettes() {
-    if (initialized) return;
-    
+void ColorPalette::initializePalettes()
+{
+    if (initialized)
+        return;
+
     // Sunset Palette
     palettes.push_back({
         {255, 94, 77, 255},   // Coral
@@ -19,7 +21,7 @@ void ColorPalette::initializePalettes() {
         {255, 138, 101, 255}, // Peach
         {240, 98, 146, 255}   // Pink
     });
-    
+
     // Ocean Palette
     palettes.push_back({
         {72, 202, 228, 255},  // Sky Blue
@@ -28,7 +30,7 @@ void ColorPalette::initializePalettes() {
         {144, 224, 239, 255}, // Light Blue
         {33, 158, 188, 255}   // Teal
     });
-    
+
     // Forest Palette
     palettes.push_back({
         {46, 125, 50, 255},   // Forest Green
@@ -37,7 +39,7 @@ void ColorPalette::initializePalettes() {
         {67, 56, 202, 255},   // Purple accent
         {139, 195, 74, 255}   // Lime
     });
-    
+
     // Autumn Palette
     palettes.push_back({
         {212, 84, 0, 255},    // Burnt Orange
@@ -46,7 +48,7 @@ void ColorPalette::initializePalettes() {
         {141, 110, 99, 255},  // Brown
         {205, 220, 57, 255}   // Yellow Green
     });
-    
+
     // Pastel Palette
     palettes.push_back({
         {240, 98, 146, 255},  // Pink
@@ -55,7 +57,7 @@ void ColorPalette::initializePalettes() {
         {255, 183, 77, 255},  // Peach
         {100, 181, 246, 255}  // Sky Blue
     });
-    
+
     // Traditional Japanese Suminagashi
     palettes.push_back({
         {45, 55, 72, 255},    // Indigo
@@ -64,16 +66,16 @@ void ColorPalette::initializePalettes() {
         {237, 242, 247, 255}, // Almost White
         {203, 213, 224, 255}  // Silver
     });
-    
+
     // Turkish Ebru Classic
     palettes.push_back({
-        {184, 59, 94, 255},   // Deep Rose
-        {52, 73, 94, 255},    // Dark Blue
-        {241, 196, 15, 255},  // Golden Yellow
-        {231, 76, 60, 255},   // Red
-        {46, 204, 113, 255}   // Emerald Green
+        {184, 59, 94, 255},  // Deep Rose
+        {52, 73, 94, 255},   // Dark Blue
+        {241, 196, 15, 255}, // Golden Yellow
+        {231, 76, 60, 255},  // Red
+        {46, 204, 113, 255}  // Emerald Green
     });
-    
+
     // Venetian Marble
     palettes.push_back({
         {139, 69, 19, 255},   // Saddle Brown
@@ -82,16 +84,16 @@ void ColorPalette::initializePalettes() {
         {245, 222, 179, 255}, // Wheat
         {255, 228, 196, 255}  // Bisque
     });
-    
+
     // Royal Purple & Gold
     palettes.push_back({
-        {75, 0, 130, 255},    // Indigo
-        {138, 43, 226, 255},  // Blue Violet
-        {218, 165, 32, 255},  // Goldenrod
-        {255, 215, 0, 255},   // Gold
-        {255, 239, 213, 255}  // Papaya Whip
+        {75, 0, 130, 255},   // Indigo
+        {138, 43, 226, 255}, // Blue Violet
+        {218, 165, 32, 255}, // Goldenrod
+        {255, 215, 0, 255},  // Gold
+        {255, 239, 213, 255} // Papaya Whip
     });
-    
+
     // Midnight Blues
     palettes.push_back({
         {25, 25, 112, 255},   // Midnight Blue
@@ -100,7 +102,7 @@ void ColorPalette::initializePalettes() {
         {147, 112, 219, 255}, // Medium Purple
         {221, 160, 221, 255}  // Plum
     });
-    
+
     // Earth Tones
     palettes.push_back({
         {160, 82, 45, 255},   // Saddle Brown
@@ -109,7 +111,7 @@ void ColorPalette::initializePalettes() {
         {245, 245, 220, 255}, // Beige
         {112, 128, 144, 255}  // Slate Gray
     });
-    
+
     // Cherry Blossom
     palettes.push_back({
         {255, 182, 193, 255}, // Light Pink
@@ -118,7 +120,7 @@ void ColorPalette::initializePalettes() {
         {255, 228, 225, 255}, // Misty Rose
         {255, 240, 245, 255}  // Lavender Blush
     });
-    
+
     // Jade Garden
     palettes.push_back({
         {0, 128, 128, 255},   // Teal
@@ -127,16 +129,16 @@ void ColorPalette::initializePalettes() {
         {175, 238, 238, 255}, // Pale Turquoise
         {240, 248, 255, 255}  // Alice Blue
     });
-    
+
     // Copper & Verdigris
     palettes.push_back({
-        {184, 115, 51, 255},  // Dark Goldenrod
-        {205, 127, 50, 255},  // Chocolate
-        {64, 224, 208, 255},  // Turquoise
-        {72, 209, 204, 255},  // Medium Turquoise
-        {175, 238, 238, 255}  // Pale Turquoise
+        {184, 115, 51, 255}, // Dark Goldenrod
+        {205, 127, 50, 255}, // Chocolate
+        {64, 224, 208, 255}, // Turquoise
+        {72, 209, 204, 255}, // Medium Turquoise
+        {175, 238, 238, 255} // Pale Turquoise
     });
-    
+
     // Wine & Cream
     palettes.push_back({
         {128, 0, 32, 255},    // Dark Red
@@ -145,18 +147,47 @@ void ColorPalette::initializePalettes() {
         {250, 235, 215, 255}, // Antique White
         {255, 248, 220, 255}  // Cornsilk
     });
-    
+
+    // Soft Marble Palette
+    palettes.push_back({
+        {220, 220, 220, 255}, // Light Gray
+        {200, 190, 180, 255}, // Warm Beige
+        {180, 170, 160, 255}, // Stone
+        {160, 150, 140, 255}, // Taupe
+        {240, 240, 235, 255}  // Off White
+    });
+
+    // Gentle Blue Marble
+    palettes.push_back({
+        {210, 220, 235, 255}, // Pale Blue
+        {180, 200, 220, 255}, // Soft Blue
+        {160, 180, 200, 255}, // Muted Blue
+        {230, 235, 240, 255}, // Lightest Blue
+        {200, 210, 220, 255}  // Gray Blue
+    });
+
+    // Cream & Sand Marble
+    palettes.push_back({
+        {245, 240, 230, 255}, // Cream
+        {230, 220, 200, 255}, // Sand
+        {215, 205, 185, 255}, // Light Sand
+        {200, 190, 170, 255}, // Beige
+        {255, 250, 240, 255}  // Ivory
+    });
+
     initialized = true;
 }
 
 // Add a new palette
-void ColorPalette::addPalette(const Palette& palette) {
+void ColorPalette::addPalette(const Palette &palette)
+{
     initializePalettes();
     palettes.push_back(palette);
 }
 
 // Constructor: randomly select a palette
-ColorPalette::ColorPalette() {
+ColorPalette::ColorPalette()
+{
     initializePalettes();
     std::mt19937 rng(static_cast<unsigned int>(std::time(nullptr)) + randSeed++);
     std::uniform_int_distribution<size_t> paletteDist(0, palettes.size() - 1);
@@ -164,7 +195,8 @@ ColorPalette::ColorPalette() {
 }
 
 // Get a random color from the current palette
-ColorPalette::ColorValue ColorPalette::getColor() {
+ColorPalette::ColorValue ColorPalette::getColor()
+{
     std::mt19937 rng(static_cast<unsigned int>(std::time(nullptr)) + randSeed++);
     std::uniform_int_distribution<size_t> colorDist(0, palettes[currentPaletteIndex].size() - 1);
     size_t colorIndex = colorDist(rng);
@@ -172,17 +204,20 @@ ColorPalette::ColorValue ColorPalette::getColor() {
 }
 
 // Get the current palette index
-size_t ColorPalette::getCurrentPaletteIndex() const { 
-    return currentPaletteIndex; 
+size_t ColorPalette::getCurrentPaletteIndex() const
+{
+    return currentPaletteIndex;
 }
 
 // Get the current palette
-const ColorPalette::Palette& ColorPalette::getCurrentPalette() const { 
-    return palettes[currentPaletteIndex]; 
+const ColorPalette::Palette &ColorPalette::getCurrentPalette() const
+{
+    return palettes[currentPaletteIndex];
 }
 
 // Get all palettes
-const std::vector<ColorPalette::Palette>& ColorPalette::getAllPalettes() { 
+const std::vector<ColorPalette::Palette> &ColorPalette::getAllPalettes()
+{
     initializePalettes();
-    return palettes; 
+    return palettes;
 }
