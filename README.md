@@ -36,7 +36,7 @@ Suminagashi (墨流し, "floating ink") is a traditional Japanese paper marbling
 
 ## 🚀 Live Demo
 
-**[Try it online →](https://sandeep-003.github.io/Computer-Graphics/suminasashi_web_final/docs/)**
+**[Try it online →](https://sandeep-003.github.io/Suminagashi/)**
 
 ## 🏗️ Architecture
 
@@ -63,7 +63,7 @@ suminasashi_web_final/
 
 1. **Emscripten SDK**
    ```bash
-   git clone https://github.com/emscripten-core/emsdk.git
+   git clone https://github.com/Sandeep-003/Suminagashi.git
    cd emsdk
    ./emsdk install latest
    ./emsdk activate latest
@@ -77,8 +77,8 @@ suminasashi_web_final/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Sandeep-003/Computer-Graphics.git
-   cd Computer-Graphics/suminasashi_web_final
+   git clone https://github.com/Sandeep-003/Suminagashi.git
+   cd Suminagashi
    ```
 
 2. **Activate Emscripten environment**
@@ -285,7 +285,7 @@ Contributions are welcome! Here's how you can help:
 
 ## 👨‍💻 Author
 
-**Sandeep Kumar**
+**Sandeep Saurav**
 - GitHub: [@Sandeep-003](https://github.com/Sandeep-003)
 - Portfolio: [Your Portfolio Link]
 - Email: [Your Email]

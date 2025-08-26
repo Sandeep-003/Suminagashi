@@ -57,6 +57,7 @@ extern "C"
 
 int main(void)
 {
+  // Following function causes mouse click to not work properly. I don't know why
   // SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE);
   InitWindow(initialScreenWidth, initialScreenHeight, "suminasashi");
 
