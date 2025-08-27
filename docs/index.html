@@ -513,6 +513,18 @@
       <button class="btn" onclick="showInfo()">
         <i class="fas fa-info-circle"></i> Info
       </button>
+      <button id="modeDrops" class="btn" onclick="setMode('drops')"><i class="fas fa-circle"></i> Drops</button>
+      <button id="modeTine" class="btn" onclick="setMode('tine')"><i class="fas fa-arrows-alt-v"></i> Tine</button>
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:180px;padding:4px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);font-size:0.7rem;">
+        <label style="width:100%;font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;align-items:center;gap:6px;">
+          <span>Strength <span id="strengthVal">80</span></span>
+          <input id="strengthSlider" type="range" min="0" max="400" value="80" step="1" style="flex:1;margin-left:6px;">
+        </label>
+        <label style="width:100%;font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;align-items:center;gap:6px;">
+          <span>Sharpness <span id="sharpnessVal">32</span></span>
+          <input id="sharpnessSlider" type="range" min="1" max="256" value="32" step="1" style="flex:1;margin-left:6px;">
+        </label>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -803,6 +815,56 @@
       });
     }
     document.addEventListener('DOMContentLoaded', initGallery);
+
+    // ---------------- Interaction Mode & Tine Parameters ----------------
+    let currentMode = 0; // 0 drops, 1 tine
+    function setMode(modeName){
+      currentMode = (modeName === 'tine') ? 1 : 0;
+      if (Module && Module.ccall) {
+        // Prefer new numeric mode API if present; fallback to legacy toggle
+        if (Module['_setInteractionMode']) {
+          Module.ccall('setInteractionMode', null, ['number'], [currentMode]);
+        } else {
+          Module.ccall('toggleTineMode', null, ['number'], [currentMode===1?1:0]);
+        }
+      }
+      document.getElementById('modeDrops').classList.toggle('btn-primary', currentMode===0);
+      document.getElementById('modeTine').classList.toggle('btn-primary', currentMode===1);
+      updateStatusText(currentMode===1);
+    }
+    function updateStatusText(isTine){
+      const statusSpan = document.querySelector('.status-indicator span');
+      if(statusSpan){ statusSpan.textContent = isTine ? 'Tine mode: click to carve' : 'Ready to create'; }
+    }
+
+    // Slider elements
+    const strengthSlider = document.getElementById('strengthSlider');
+    const sharpnessSlider = document.getElementById('sharpnessSlider');
+    function updateSliderLabels(){
+      document.getElementById('strengthVal').textContent = strengthSlider.value;
+      document.getElementById('sharpnessVal').textContent = sharpnessSlider.value;
+    }
+    strengthSlider.addEventListener('input', updateSliderLabels);
+    sharpnessSlider.addEventListener('input', updateSliderLabels);
+    updateSliderLabels();
+
+    // Canvas click -> either drop (handled in C++ main loop when mode=0) or direct tine application
+    const canvasEl = document.getElementById('canvas');
+    canvasEl.addEventListener('click', function(ev){
+      if (currentMode !== 1) return; // not tine
+      if (!(Module && Module.ccall)) return;
+      const rect = canvasEl.getBoundingClientRect();
+      const x = ev.clientX - rect.left; // canvas x coordinate
+      const strength = parseFloat(strengthSlider.value);
+      const sharpness = parseFloat(sharpnessSlider.value);
+      Module.ccall('applyTineAt', null, ['number','number','number'], [x, strength, sharpness]);
+    });
+
+    // Keyboard shortcut: T toggles between 0 and 1
+    window.addEventListener('keydown', e=>{ if(e.key==='t' || e.key==='T'){ setMode(currentMode===1 ? 'drops':'tine'); }});
+
+    // Initialize after runtime
+    Module.onRuntimeInitialized = (function(orig){ return function(){ if(orig) orig(); setMode('drops'); updateSliderLabels(); };})(Module.onRuntimeInitialized);
   </script>
   <script async src="suminasashi.js"></script>
 </body>
