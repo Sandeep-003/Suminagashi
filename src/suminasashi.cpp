@@ -24,6 +24,9 @@ int fpsIndex = 0;
 float avgFPS = 60.0f;
 bool f = 0;
 vector<Drop> drops;
+// Interaction modes (numeric for future extensibility)
+// 0 = drops, 1 = tine
+static int interactionMode = 0;
 // Create a new ColorPalette instance and get a random color from current palette
 ColorPalette colorGenerator;
 
@@ -53,6 +56,16 @@ extern "C"
     // Clear your drops vector and redraw
     drops.clear();
   }
+}
+extern "C" {
+  void toggleTineMode(int on) { interactionMode = (on?1:0); }
+  // Set interaction mode explicitly (0 drops, 1 tine, others reserved)
+  void setInteractionMode(int mode) { if (mode < 0) mode = 0; if (mode > 10) mode = 10; interactionMode = mode; }
+  // Directly apply a tine at x (in screen coords) with optional strength & sharpness (radius param reused as sharpness)
+  void applyTineAt(float x, float strength, float sharpness) {
+    for (auto &d : drops) d.applyVerticalTine(x, strength, sharpness, true);
+  }
+  void setTineParams(float strength, float sharpness) { /* kept for backward compatibility but unused now */ }
 }
 
 int main(void)
@@ -86,23 +99,24 @@ void draw()
   if (currentN < N_MIN) currentN = N_MIN;
   if (currentN > N_MAX) currentN = N_MAX;
 
-  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-  {
+  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
     int mouseX = GetMouseX();
-    int mouseY = GetMouseY();
-    auto colorRGBA = colorGenerator.getColor();
-    color dropColor(colorRGBA[0], colorRGBA[1], colorRGBA[2], colorRGBA[3]);
-    int radius = GetRandomValue(30, 120);
-    Drop d = Drop(mouseX, mouseY, dropColor, radius, currentN);
-    const auto &palette = colorGenerator.getCurrentPalette();
-    if (!palette.empty()) {
-      auto target = palette[GetRandomValue(0, (int)palette.size() - 1)];
-      d.setTargetColor(color(target[0], target[1], target[2], target[3]), 0.6f);
-    }
-    for (size_t i = 0; i < drops.size(); i++) {
-      drops[i].marble(d, 1);
-    }
-    drops.push_back(d);
+    int mouseY = GetMouseY(); // reserved for future stylus angle features
+  if (interactionMode == 0) {
+      auto colorRGBA = colorGenerator.getColor();
+      color dropColor(colorRGBA[0], colorRGBA[1], colorRGBA[2], colorRGBA[3]);
+      int radius = GetRandomValue(30, 120);
+      Drop d = Drop(mouseX, mouseY, dropColor, radius, currentN);
+      const auto &palette = colorGenerator.getCurrentPalette();
+      if (!palette.empty()) {
+        auto target = palette[GetRandomValue(0, (int)palette.size() - 1)];
+        d.setTargetColor(color(target[0], target[1], target[2], target[3]), 0.6f);
+      }
+      for (size_t i = 0; i < drops.size(); i++) {
+        drops[i].marble(d, 1);
+      }
+      drops.push_back(d);
+    } // mode 1 (tine) handled from JS by calling applyTineAt directly
   }
 
   for (int i = 0; i < drops.size(); i++) {
@@ -114,6 +128,7 @@ void draw()
 
   // Display FPS and currentN
   DrawText(TextFormat("FPS: %.1f", avgFPS), 20, 20, 24, DARKGRAY);
+  DrawText(interactionMode == 1 ? "Mode: Tine" : "Mode: Drops", 20, 50, 20, interactionMode == 1 ? MAROON : DARKGREEN);
   // DrawText(TextFormat("Vertices per drop: %d", currentN), 20, 50, 24, DARKGRAY);
 
   // Optionally, draw something that adapts to screenWidth/screenHeight

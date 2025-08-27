@@ -64,6 +64,11 @@ public:
     void animateShape(float time, float amplitude, float speed, int harmonics = 1);
     // Set transparency (0..255)
     void setAlpha(int a) { clr.a = a; }
+    // Apply a vertical tine (comb/stylus) deformation at x position. strength controls
+    // maximum horizontal displacement (pixels). radius is falloff distance.
+    // Positive strength pushes points sideways away from the tine; a subtle vertical
+    // ripple is added for fluid feel.
+    void applyVerticalTine(float x, float strength, float radius, bool commitBase=true);
     // Assign a target color for gradual blending
     void setTargetColor(const color& c, float maxBlendAmount = 0.6f) {
         targetClr = c; hasTarget = true; startClr = clr; blendAccum = 0.0f; maxBlend = maxBlendAmount; if (maxBlend < 0) maxBlend = 0; if (maxBlend > 1) maxBlend = 1; }
