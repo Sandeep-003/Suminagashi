@@ -40,7 +40,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os")    
 
 # Export JS-callable functions (add tine features) and runtime methods
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sEXPORTED_FUNCTIONS=\"['_display','_clearCanvas','_main','_takeScreenshot','_toggleTineMode','_applyTineAt','_setTineParams','_setInteractionMode']\" -sEXPORTED_RUNTIME_METHODS=\"['ccall','cwrap']\" -sALLOW_MEMORY_GROWTH=1")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sEXPORTED_FUNCTIONS=\"['_display','_clearCanvas','_main','_takeScreenshot','_toggleTineMode','_applyTineAt','_setTineParams','_setInteractionMode','_setNextDropRadius','_setNextDropColor','_getCurrentPaletteSize','_getCurrentPaletteColor']\" -sEXPORTED_RUNTIME_METHODS=\"['ccall','cwrap']\" -sALLOW_MEMORY_GROWTH=1")
 
 # Additional Emscripten flags for WebGL and screenshot support
 if(EMSCRIPTEN)

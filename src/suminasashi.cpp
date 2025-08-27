@@ -29,6 +29,9 @@ vector<Drop> drops;
 static int interactionMode = 0;
 // Create a new ColorPalette instance and get a random color from current palette
 ColorPalette colorGenerator;
+// User-selected parameters for next drop (instead of random)
+static int nextDropRadius = 80; // default radius
+static color nextDropColor(255,255,255,255); // will be initialized from palette on runtime init
 
 void InitSetup();
 void close();
@@ -66,6 +69,23 @@ extern "C" {
     for (auto &d : drops) d.applyVerticalTine(x, strength, sharpness, true);
   }
   void setTineParams(float strength, float sharpness) { /* kept for backward compatibility but unused now */ }
+  // Setters for next drop parameters
+  void setNextDropRadius(int r) { if (r < 5) r = 5; if (r > 400) r = 400; nextDropRadius = r; }
+  void setNextDropColor(int r, int g, int b, int a) {
+    if (r<0) r=0; if (r>255) r=255; if (g<0) g=0; if (g>255) g=255; if (b<0) b=0; if (b>255) b=255; if (a<0) a=0; if (a>255) a=255;
+    nextDropColor = color(r,g,b,a);
+  }
+  // Palette query helpers (pack RGBA into 32-bit int: 0xRRGGBBAA)
+  int getCurrentPaletteSize() {
+    const auto &p = colorGenerator.getCurrentPalette();
+    return (int)p.size();
+  }
+  int getCurrentPaletteColor(int idx) {
+    const auto &p = colorGenerator.getCurrentPalette();
+    if (idx < 0 || idx >= (int)p.size()) return 0xFFFFFFFF; // default white
+    auto c = p[idx];
+    return ((c[0] & 0xFF) << 24) | ((c[1] & 0xFF) << 16) | ((c[2] & 0xFF) << 8) | (c[3] & 0xFF);
+  }
 }
 
 int main(void)
@@ -75,6 +95,12 @@ int main(void)
   InitWindow(initialScreenWidth, initialScreenHeight, "suminasashi");
 
   SetTargetFPS(60); // Set our game to run at 60 frames-per-second
+  // Initialize default nextDropColor from current palette first color if available
+  const auto &cp = colorGenerator.getCurrentPalette();
+  if (!cp.empty()) {
+    auto c = cp[0];
+    nextDropColor = color(c[0], c[1], c[2], c[3]);
+  }
   emscripten_set_main_loop(draw, 0, 1);
   close();
 }
@@ -102,15 +128,19 @@ void draw()
   if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
     int mouseX = GetMouseX();
     int mouseY = GetMouseY(); // reserved for future stylus angle features
-  if (interactionMode == 0) {
-      auto colorRGBA = colorGenerator.getColor();
-      color dropColor(colorRGBA[0], colorRGBA[1], colorRGBA[2], colorRGBA[3]);
-      int radius = GetRandomValue(30, 120);
-      Drop d = Drop(mouseX, mouseY, dropColor, radius, currentN);
+    if (interactionMode == 0) {
+      // Construct drop using user-selected radius/color
+      Drop d = Drop(mouseX, mouseY, nextDropColor, nextDropRadius, currentN);
+      // Optional: still assign a gentle target blend to another palette color for subtle evolution
       const auto &palette = colorGenerator.getCurrentPalette();
       if (!palette.empty()) {
-        auto target = palette[GetRandomValue(0, (int)palette.size() - 1)];
-        d.setTargetColor(color(target[0], target[1], target[2], target[3]), 0.6f);
+        // Choose a different color than selected for slow blend (optional)
+        if (palette.size() > 1) {
+          int pick = GetRandomValue(0, (int)palette.size() - 1);
+          // Avoid identical color unless only one color
+          auto csel = palette[pick];
+          d.setTargetColor(color(csel[0], csel[1], csel[2], csel[3]), 0.4f);
+        }
       }
       for (size_t i = 0; i < drops.size(); i++) {
         drops[i].marble(d, 1);

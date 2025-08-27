@@ -229,7 +229,7 @@ async function createWasm() {
         wasmExports = instance.exports;
         wasmMemory = wasmExports["kg"];
         updateMemoryViews();
-        wasmTable = wasmExports["tg"];
+        wasmTable = wasmExports["xg"];
         assignWasmExports(wasmExports);
         removeRunDependency("wasm-instantiate");
         return wasmExports
@@ -7763,7 +7763,7 @@ function GetWindowInnerWidth() {
 function GetWindowInnerHeight() {
     return window.innerHeight
 }
-var _display, _takeScreenshot, _clearCanvas, _toggleTineMode, _setInteractionMode, _applyTineAt, _setTineParams, _main, _malloc, _free, __emscripten_stack_restore, __emscripten_stack_alloc, _emscripten_stack_get_current;
+var _display, _takeScreenshot, _clearCanvas, _toggleTineMode, _setInteractionMode, _applyTineAt, _setTineParams, _setNextDropRadius, _setNextDropColor, _getCurrentPaletteSize, _getCurrentPaletteColor, _main, _malloc, _free, __emscripten_stack_restore, __emscripten_stack_alloc, _emscripten_stack_get_current;
 
 function assignWasmExports(wasmExports) {
     Module["_display"] = _display = wasmExports["mg"];
@@ -7773,12 +7773,16 @@ function assignWasmExports(wasmExports) {
     Module["_setInteractionMode"] = _setInteractionMode = wasmExports["qg"];
     Module["_applyTineAt"] = _applyTineAt = wasmExports["rg"];
     Module["_setTineParams"] = _setTineParams = wasmExports["sg"];
-    Module["_main"] = _main = wasmExports["ug"];
-    _malloc = wasmExports["vg"];
-    _free = wasmExports["wg"];
-    __emscripten_stack_restore = wasmExports["xg"];
-    __emscripten_stack_alloc = wasmExports["yg"];
-    _emscripten_stack_get_current = wasmExports["zg"]
+    Module["_setNextDropRadius"] = _setNextDropRadius = wasmExports["tg"];
+    Module["_setNextDropColor"] = _setNextDropColor = wasmExports["ug"];
+    Module["_getCurrentPaletteSize"] = _getCurrentPaletteSize = wasmExports["vg"];
+    Module["_getCurrentPaletteColor"] = _getCurrentPaletteColor = wasmExports["wg"];
+    Module["_main"] = _main = wasmExports["yg"];
+    _malloc = wasmExports["zg"];
+    _free = wasmExports["Ag"];
+    __emscripten_stack_restore = wasmExports["Bg"];
+    __emscripten_stack_alloc = wasmExports["Cg"];
+    _emscripten_stack_get_current = wasmExports["Dg"]
 }
 var wasmImports = {
     xa: GetWindowInnerHeight,

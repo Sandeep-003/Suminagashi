@@ -525,6 +525,13 @@
           <input id="sharpnessSlider" type="range" min="1" max="256" value="32" step="1" style="flex:1;margin-left:6px;">
         </label>
       </div>
+      <div style="display:flex;flex-direction:column;gap:4px;min-width:190px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);font-size:0.7rem;">
+        <label style="display:flex;justify-content:space-between;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;">
+          <span>Drop Radius <span id="radiusVal">80</span></span>
+          <input id="radiusSlider" type="range" min="5" max="400" value="80" step="1" style="flex:1;">
+        </label>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;" id="paletteColors" aria-label="Palette colors"></div>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -846,31 +853,79 @@
     // Slider elements
     const strengthSlider = document.getElementById('strengthSlider');
     const sharpnessSlider = document.getElementById('sharpnessSlider');
+    const radiusSlider = document.getElementById('radiusSlider');
+    const radiusVal = document.getElementById('radiusVal');
     function updateSliderLabels(){
       document.getElementById('strengthVal').textContent = strengthSlider.value;
       document.getElementById('sharpnessVal').textContent = sharpnessSlider.value;
+      radiusVal.textContent = radiusSlider.value;
     }
     strengthSlider.addEventListener('input', updateSliderLabels);
     sharpnessSlider.addEventListener('input', updateSliderLabels);
+    radiusSlider.addEventListener('input', ()=>{ updateSliderLabels(); if(Module && Module.ccall){ Module.ccall('setNextDropRadius', null, ['number'], [parseInt(radiusSlider.value)]);} });
     updateSliderLabels();
 
-    // Canvas click -> either drop (handled in C++ main loop when mode=0) or direct tine application
-    const canvasEl = document.getElementById('canvas');
-    canvasEl.addEventListener('click', function(ev){
-      if (currentMode !== 1) return; // not tine
-      if (!(Module && Module.ccall)) return;
-      const rect = canvasEl.getBoundingClientRect();
-      const x = ev.clientX - rect.left; // canvas x coordinate
-      const strength = parseFloat(strengthSlider.value);
-      const sharpness = parseFloat(sharpnessSlider.value);
-      Module.ccall('applyTineAt', null, ['number','number','number'], [x, strength, sharpness]);
+    // Palette color selection UI
+    const paletteContainer = document.getElementById('paletteColors');
+    let selectedColorBtn = null;
+    function rgbaFromPacked(p){ return {r:(p>>>24)&0xFF,g:(p>>>16)&0xFF,b:(p>>>8)&0xFF,a:p&0xFF}; }
+    function buildPalette(){
+      if(!(Module && Module.ccall)) return;
+      paletteContainer.innerHTML='';
+      const count = Module.ccall('getCurrentPaletteSize','number',[],[]);
+      for(let i=0;i<count;i++){
+        const packed = Module.ccall('getCurrentPaletteColor','number',['number'],[i]);
+        const {r,g,b,a} = rgbaFromPacked(packed);
+        const btn = document.createElement('button');
+        btn.type='button';
+        btn.style.width='20px';
+        btn.style.height='20px';
+        btn.style.border='1px solid var(--border)';
+        btn.style.borderRadius='4px';
+        btn.style.background=`rgba(${r},${g},${b},${a/255})`;
+        btn.title=`RGB(${r},${g},${b})`;
+        btn.addEventListener('click',()=>{
+          if(selectedColorBtn) selectedColorBtn.style.outline='none';
+          selectedColorBtn = btn; btn.style.outline='2px solid var(--accent)';
+          Module.ccall('setNextDropColor', null, ['number','number','number','number'], [r,g,b,a]);
+        });
+        if(i===0){ btn.style.outline='2px solid var(--accent)'; selectedColorBtn=btn; Module.ccall('setNextDropColor', null, ['number','number','number','number'], [r,g,b,a]); }
+        paletteContainer.appendChild(btn);
+      }
+    }
+    // Rebuild palette after runtime init (in case palette selected randomly)
+    function afterRuntimeInit(){ buildPalette(); setMode('drops'); updateSliderLabels(); Module.ccall('setNextDropRadius', null, ['number'], [parseInt(radiusSlider.value)]); }
+    Module.onRuntimeInitialized = (function(orig){ return function(){ if(orig) orig(); afterRuntimeInit(); };})(Module.onRuntimeInitialized);
+
+    // ---------------- Tine Interaction (applyTineAt bridge) ----------------
+    (function initTineInput(){
+      const canvas = document.getElementById('canvas');
+      if(!canvas) return;
+      let isDown = false;
+      let lastX = -9999;
+      const MIN_DELTA = 4; // only re-apply while dragging if moved this many px
+      function invokeTine(clientX){
+        if(currentMode !== 1) return;
+        if(!(Module && Module.ccall)) return;
+        const rect = canvas.getBoundingClientRect();
+        // Scale to canvas backing store size (Emscripten sets width/height attributes)
+        const canvasX = (clientX - rect.left) * (canvas.width / rect.width);
+        const strength = parseFloat(strengthSlider.value) || 0;
+        const sharpness = parseFloat(sharpnessSlider.value) || 1;
+        Module.ccall('applyTineAt', null, ['number','number','number'], [canvasX, strength, sharpness]);
+      }
+      canvas.addEventListener('mousedown', e=>{ if(e.button!==0) return; isDown=true; lastX=-9999; invokeTine(e.clientX); });
+      window.addEventListener('mouseup', ()=>{ isDown=false; });
+      canvas.addEventListener('mousemove', e=>{ if(!isDown) return; const rect = canvas.getBoundingClientRect(); const x = (e.clientX - rect.left) * (canvas.width / rect.width); if(Math.abs(x-lastX) >= MIN_DELTA){ invokeTine(e.clientX); lastX = x; } });
+      canvas.addEventListener('mouseleave', ()=>{ isDown=false; });
+    })();
+
+    // ---------------- Keyboard Shortcut (T toggles mode) ----------------
+    window.addEventListener('keydown', (e)=>{
+      if(e.key === 't' || e.key === 'T'){
+        setMode(currentMode===0 ? 'tine' : 'drops');
+      }
     });
-
-    // Keyboard shortcut: T toggles between 0 and 1
-    window.addEventListener('keydown', e=>{ if(e.key==='t' || e.key==='T'){ setMode(currentMode===1 ? 'drops':'tine'); }});
-
-    // Initialize after runtime
-    Module.onRuntimeInitialized = (function(orig){ return function(){ if(orig) orig(); setMode('drops'); updateSliderLabels(); };})(Module.onRuntimeInitialized);
   </script>
   <script async src="suminasashi.js"></script>
 </body>
