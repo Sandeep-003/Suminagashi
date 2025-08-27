@@ -117,7 +117,7 @@
 
     .hero {
       text-align: center;
-      padding: 4rem 0 2rem;
+      padding: 3rem 0 1.5rem;
       background: var(--gradient);
       background-clip: text;
       -webkit-background-clip: text;
@@ -132,11 +132,12 @@
     }
 
     .hero p {
-      font-size: 1.2rem;
+      font-size: 1rem;
       color: var(--text-secondary);
-      max-width: 600px;
-      margin: 0 auto 2rem;
+      max-width: 520px;
+      margin: 0 auto 1.5rem;
       -webkit-text-fill-color: var(--text-secondary);
+      line-height: 1.4;
     }
 
     .controls {
@@ -495,8 +496,7 @@
     <!-- Hero Section -->
     <section class="hero">
       <h1>Suminagashi</h1>
-      <p>Experience the ancient Japanese art of paper marbling in your browser. Create beautiful flowing patterns with
-        dynamic color palettes.</p>
+      <p>Create beautiful flowing patterns with drops and vertical tines. Toggle modes with T key for precise marbling control.</p>
     </section>
 
     <!-- Controls -->
@@ -541,7 +541,7 @@
           <span>Ready to create</span>
         </div>
         <div>
-          <span>Click to create drops • Each drop uses a random color palette</span>
+          <span>Toggle modes with T • Drops: random colors • Tine: carve patterns</span>
         </div>
       </div>
       <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
@@ -568,9 +568,15 @@
         <div class="instruction-item">
           <i class="fas fa-mouse-pointer instruction-icon"></i>
           <div>
-            <strong>Click to Create Drops</strong>
-            <p>Click anywhere on the canvas to create a new drop. Each drop will use a randomly selected color from
-              beautiful themed palettes.</p>
+            <strong>Two Interaction Modes</strong>
+            <p><strong>Drops Mode:</strong> Click to create new drops with random themed colors. <strong>Tine Mode:</strong> Click to carve elegant vertical deformations into existing patterns. Press <kbd>T</kbd> key to toggle between modes.</p>
+          </div>
+        </div>
+        <div class="instruction-item">
+          <i class="fas fa-arrows-alt-v instruction-icon"></i>
+          <div>
+            <strong>Vertical Tine Tool</strong>
+            <p>In Tine mode, adjust <strong>Strength</strong> (0-400) for displacement intensity and <strong>Sharpness</strong> (1-256) for influence radius. Features smooth quintic falloff and diminishing returns to prevent over-carving.</p>
           </div>
         </div>
         <div class="instruction-item">

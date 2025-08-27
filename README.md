@@ -17,6 +17,14 @@ Suminagashi (墨流し, "floating ink") is a traditional Japanese paper marbling
 
 ### 🎯 Core Features
 - **Interactive Canvas**: Click anywhere to create marbling drops
+- **Vertical Tine Tool**: Carve elegant vertical deformations into existing patterns
+  - **Smooth Falloff**: Non-linear quintic smoothing for natural edges  
+  - **Adjustable Strength**: Control displacement intensity (0-400 pixels)
+  - **Variable Sharpness**: Adjust influence radius and concentration (1-256)
+  - **Diminishing Returns**: Prevents over-carving with cumulative displacement limits
+- **Dual Interaction Modes**: Toggle between **Drops** and **Tine** modes
+  - **Keyboard Shortcut**: Press `T` to switch modes instantly
+  - **Visual Feedback**: Clear mode indicators and status text
 - **15 Beautiful Color Palettes**: Carefully curated themes including:
   - Traditional Japanese Suminagashi (indigo & gray)
   - Turkish Ebru Classic (vibrant traditional colors)
@@ -122,9 +130,13 @@ make
 5. **Experiment** with different clicking patterns
 
 ### Controls
-- **Left Click**: Create a new drop with random color
+- **Left Click (Drops Mode)**: Create a new drop with random color
+- **Left Click (Tine Mode)**: Apply vertical carving deformation at cursor position
+- **T Key**: Toggle between Drops and Tine interaction modes
+- **Strength Slider**: Adjust tine displacement intensity (0-400 pixels)
+- **Sharpness Slider**: Control tine influence radius and falloff steepness (1-256)
 - **Screenshot Button**: Save current canvas as PNG
-- **Clear Button**: Reset the canvas (if implemented)
+- **Clear Button**: Reset the canvas
 - **Fullscreen Button**: Toggle fullscreen mode
 
 ## 🎨 Color Palettes
@@ -171,12 +183,16 @@ class Drop {
     double radius;
     color clr;
     std::vector<Vector2> vertices;
+    std::vector<Vector2> baseVertices; // Stable reference for cumulative operations
     
 public:
     Drop(float x, float y, color clr, double radius, int n);
     void Draw_drops();
-    void marble(const Drop& other);    // Interaction with other drops
-    void wavy_transformation();       // Visual effects
+    void marble(const Drop& other);           // Interaction with other drops
+    void applyVerticalTine(float x, float strength, float sharpness, bool commitBase=true);
+    void wavy_transformation();              // Visual effects
+    void applyEdgeNoise(float amplitude, float frequency, float time);
+    void animateShape(float time, float amplitude, float speed, int harmonics=1);
 };
 ```
 
