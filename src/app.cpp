@@ -12,13 +12,14 @@ constexpr const char* kWindowTitle = "suminasashi";
 constexpr int kDefaultWidth = 1200;
 constexpr int kDefaultHeight = 800;
 constexpr int kMinDropRadius = 5;
-constexpr int kMaxDropRadius = 400;
+constexpr int kMaxDropRadius = 120;
 constexpr int kFpsLow = 40;
 constexpr int kFpsHigh = 60;
 constexpr int kVertexMin = 200;
 constexpr int kVertexMax = 600;
 constexpr int kVertexStep = 10;
 constexpr float kDegToRad = 3.14159265358979323846f / 180.0f;
+constexpr double kPatternBloomIntervalSeconds = 0.01;
 
 SuminagashiApp* gApp = nullptr;
 
@@ -202,6 +203,8 @@ void SuminagashiApp::UpdateAdaptiveVertexCount(float fps)
 
 void SuminagashiApp::UpdateDrops()
 {
+    ProcessPatternBloomQueue();
+
     const float time = static_cast<float>(GetTime());
     for (auto& drop : drops)
     {
@@ -333,6 +336,9 @@ int SuminagashiApp::GeneratePatternBloom()
     }
 
     drops.clear();
+    patternQueue.clear();
+    patternQueueCursor = 0;
+    nextPatternEmitTime = GetTime();
 
     const int width = std::max(1, metrics.renderWidth > 0 ? metrics.renderWidth : GetRenderWidth());
     const int height = std::max(1, metrics.renderHeight > 0 ? metrics.renderHeight : GetRenderHeight());
@@ -342,18 +348,21 @@ int SuminagashiApp::GeneratePatternBloom()
     const float cy = h * 0.5f;
     const float minDim = std::min(w, h);
 
-    auto addDrop = [&](float x, float y, float radius)
+    auto queueDrop = [&](float x, float y, float radius)
     {
         if (x < -radius || x > w + radius || y < -radius || y > h + radius)
         {
             return;
         }
 
-        const int clampedRadius = std::clamp(static_cast<int>(std::lround(radius)), kMinDropRadius, kMaxDropRadius);
-        const color baseColor = PickRandomCurrentPaletteColor(colorGenerator);
-        Drop drop(x, y, baseColor, clampedRadius, currentN);
-        drop.setTargetColor(PickRandomCurrentPaletteColor(colorGenerator), 0.35f + static_cast<float>(GetRandomValue(0, 20)) / 100.0f);
-        AddDropWithMarbling(drops, drop);
+        PatternDropSeed seed;
+        seed.x = x;
+        seed.y = y;
+        seed.radius = static_cast<float>(std::clamp(static_cast<int>(std::lround(radius)), kMinDropRadius, kMaxDropRadius));
+        seed.baseColor = PickRandomCurrentPaletteColor(colorGenerator);
+        seed.targetColor = PickRandomCurrentPaletteColor(colorGenerator);
+        seed.targetBlend = 0.35f + static_cast<float>(GetRandomValue(0, 20)) / 100.0f;
+        patternQueue.push_back(seed);
     };
 
     const int patternId = patternCycleIndex % 5;
@@ -374,7 +383,7 @@ int SuminagashiApp::GeneratePatternBloom()
             const float x = (static_cast<float>(col) + 0.5f) * cellW + jitterX;
             const float y = (static_cast<float>(row) + 0.5f) * cellH + jitterY;
             const float radius = baseRadius * (0.85f + static_cast<float>(GetRandomValue(0, 35)) / 100.0f);
-            addDrop(x, y, radius);
+            queueDrop(x, y, radius);
         }
     }
 
@@ -391,7 +400,7 @@ int SuminagashiApp::GeneratePatternBloom()
             const float x = cx + radial * std::cos(angle);
             const float y = cy + radial * std::sin(angle);
             const float radius = minDim * (0.007f + 0.028f * (0.5f + 0.5f * std::sin(static_cast<float>(i) * 0.23f)));
-            addDrop(x, y, radius);
+            queueDrop(x, y, radius);
         }
         break;
     }
@@ -405,7 +414,7 @@ int SuminagashiApp::GeneratePatternBloom()
             const float x = cx + (w * 0.42f) * std::sin(3.0f * t + phase) + static_cast<float>(GetRandomValue(-14, 14));
             const float y = cy + (h * 0.34f) * std::sin(4.0f * t) + static_cast<float>(GetRandomValue(-10, 10));
             const float radius = minDim * (0.009f + 0.03f * (0.5f + 0.5f * std::cos(5.0f * t)));
-            addDrop(x, y, radius);
+            queueDrop(x, y, radius);
         }
         break;
     }
@@ -424,7 +433,7 @@ int SuminagashiApp::GeneratePatternBloom()
                 const float x = cx + distance * std::cos(theta);
                 const float y = cy + distance * std::sin(theta);
                 const float radius = minDim * (0.006f + 0.024f * (1.0f - static_cast<float>(ring) / static_cast<float>(ringCount + 2)));
-                addDrop(x, y, radius);
+                queueDrop(x, y, radius);
             }
         }
         break;
@@ -446,7 +455,7 @@ int SuminagashiApp::GeneratePatternBloom()
                 const float x = fx * stepX + waveX;
                 const float y = fy * stepY + waveY;
                 const float radius = minDim * (0.008f + 0.025f * (0.5f + 0.5f * std::sin((fx + fy) * 0.7f)));
-                addDrop(x, y, radius);
+                queueDrop(x, y, radius);
             }
         }
         break;
@@ -467,7 +476,7 @@ int SuminagashiApp::GeneratePatternBloom()
                 const float x = cx + distance * std::cos(angle);
                 const float y = cy + distance * std::sin(angle);
                 const float radius = minDim * (0.009f + 0.03f * (1.0f - t));
-                addDrop(x, y, radius);
+                queueDrop(x, y, radius);
             }
         }
         break;
@@ -475,6 +484,28 @@ int SuminagashiApp::GeneratePatternBloom()
     }
 
     return patternId;
+}
+
+void SuminagashiApp::ProcessPatternBloomQueue()
+{
+    if (patternQueueCursor >= patternQueue.size())
+    {
+        return;
+    }
+
+    const double now = GetTime();
+    if (now < nextPatternEmitTime)
+    {
+        return;
+    }
+
+    // Emit one generated drop every 10ms to avoid blocking the render loop.
+    const PatternDropSeed& seed = patternQueue[patternQueueCursor];
+    Drop drop(seed.x, seed.y, seed.baseColor, static_cast<int>(seed.radius), currentN);
+    drop.setTargetColor(seed.targetColor, seed.targetBlend);
+    AddDropWithMarbling(drops, drop);
+    patternQueueCursor += 1;
+    nextPatternEmitTime = now + kPatternBloomIntervalSeconds;
 }
 
 void SuminagashiApp::SetQualityMode(int mode)

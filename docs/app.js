@@ -225,6 +225,10 @@
     const nextMode = getQualityLevel(Number(mode)).id;
     state.qualityMode = nextMode;
 
+    if (el.qualitySelect) {
+      el.qualitySelect.value = String(nextMode);
+    }
+
     if (el.qualityButtons) {
       [...el.qualityButtons.querySelectorAll('button')].forEach(button => {
         button.classList.toggle('btn-primary', Number(button.dataset.mode) === nextMode);
@@ -243,6 +247,10 @@
 
   function setMode(mode, persist = true) {
     state.mode = normalizeMode(mode);
+
+    if (el.modeSelect) {
+      el.modeSelect.value = state.mode;
+    }
 
     if (el.modeDrops) el.modeDrops.classList.toggle('btn-primary', state.mode === 'drops');
     if (el.modeRandomPalette) el.modeRandomPalette.classList.toggle('btn-primary', state.mode === 'randomPalette');
@@ -597,6 +605,7 @@
     el.modeRandomPalette?.addEventListener('click', () => setMode('randomPalette'));
     el.modeRandomFull?.addEventListener('click', () => setMode('randomFull'));
     el.modeTine?.addEventListener('click', () => setMode('tine'));
+    el.modeSelect?.addEventListener('change', () => setMode(el.modeSelect.value));
     el.clearButton?.addEventListener('click', clearCanvas);
     el.screenshotButton?.addEventListener('click', () => saveScreenshot());
     el.fullscreenButton?.addEventListener('click', toggleFullscreen);
@@ -605,8 +614,10 @@
     el.fitCanvasButton?.addEventListener('click', fitCanvas);
     el.patternBloomButton?.addEventListener('click', triggerPatternBloom);
     el.radiusSlider?.addEventListener('input', () => {
+      const radius = Math.min(120, Number.parseInt(el.radiusSlider.value, 10));
+      el.radiusSlider.value = String(radius);
       updateSliderLabels();
-      callNative('setNextDropRadius', null, ['number'], [Number.parseInt(el.radiusSlider.value, 10)]);
+      callNative('setNextDropRadius', null, ['number'], [radius]);
       syncSettingsFromUi();
       writeSettings();
     });
@@ -641,6 +652,7 @@
     el.qualityButtons?.querySelectorAll('button').forEach(button => {
       button.addEventListener('click', () => setQualityMode(Number(button.dataset.mode)));
     });
+    el.qualitySelect?.addEventListener('change', () => setQualityMode(Number(el.qualitySelect.value)));
     el.paletteColors?.addEventListener('contextmenu', event => event.preventDefault());
 
     window.addEventListener('resize', () => scheduleLayoutSync('window-resize'));
@@ -734,7 +746,11 @@
   }
 
   function applySettingsToRuntime() {
-    callNative('setNextDropRadius', null, ['number'], [Number.parseInt(el.radiusSlider?.value || '80', 10)]);
+    const radius = Math.min(120, Number.parseInt(el.radiusSlider?.value || '80', 10));
+    if (el.radiusSlider) {
+      el.radiusSlider.value = String(radius);
+    }
+    callNative('setNextDropRadius', null, ['number'], [radius]);
     callNative('setPaletteIndex', null, ['number'], [state.paletteIndex]);
     callNative('setInteractionMode', null, ['number'], [state.mode === 'tine' ? 1 : state.mode === 'randomPalette' ? 2 : state.mode === 'randomFull' ? 3 : 0]);
     callNative('setQualityMode', null, ['number'], [state.qualityMode]);
@@ -754,6 +770,7 @@
     el.modeRandomPalette = byId('modeRandomPalette');
     el.modeRandomFull = byId('modeRandomFull');
     el.modeTine = byId('modeTine');
+    el.modeSelect = byId('modeSelect');
     el.clearButton = byId('clearButton');
     el.screenshotButton = byId('screenshotButton');
     el.fullscreenButton = byId('fullscreenButton');
@@ -770,6 +787,7 @@
     el.paletteSelect = byId('paletteSelect');
     el.paletteColors = byId('paletteColors');
     el.qualityButtons = byId('qualityButtons');
+    el.qualitySelect = byId('qualitySelect');
     el.presetSelect = byId('presetSelect');
     el.exportPrefix = byId('exportPrefix');
     el.exportTimestamp = byId('exportTimestamp');

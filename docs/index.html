@@ -622,11 +622,16 @@
       <button id="patternBloomButton" class="btn btn-primary">
         <i class="fas fa-wand-magic-sparkles"></i> Pattern Bloom
       </button>
-      <button id="modeDrops" class="btn"><i class="fas fa-circle"></i> Drops</button>
-      <button id="modeRandomPalette" class="btn"><i class="fas fa-random"></i> Random Palette</button>
-      <button id="modeRandomFull" class="btn"><i class="fas fa-dice"></i> Random Full</button>
-      <button id="modeTine" class="btn"><i class="fas fa-arrows-alt-v"></i> Tine</button>
       <div class="control-card">
+        <label>
+          <span>Mode</span>
+          <select id="modeSelect" aria-label="Interaction mode">
+            <option value="drops">Drops</option>
+            <option value="randomPalette">Random Palette</option>
+            <option value="randomFull">Random Full</option>
+            <option value="tine">Tine</option>
+          </select>
+        </label>
         <label style="width:100%;font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;align-items:center;gap:6px;">
           <span>Strength <span id="strengthVal">80</span></span>
           <input id="strengthSlider" type="range" min="0" max="400" value="80" step="1" style="flex:1;margin-left:6px;">
@@ -639,7 +644,7 @@
       <div class="control-card">
         <label style="font-family:'JetBrains Mono',monospace;">
           <span>Drop Radius <span id="radiusVal">80</span></span>
-          <input id="radiusSlider" type="range" min="5" max="400" value="80" step="1" style="flex:1;">
+          <input id="radiusSlider" type="range" min="5" max="120" value="80" step="1" style="flex:1;">
         </label>
         <label>
           <span>Palette Set</span>
@@ -648,12 +653,14 @@
         <div id="paletteColors" style="display:flex;flex-wrap:wrap;gap:4px;" aria-label="Palette colors"></div>
       </div>
       <div class="control-card">
-        <label><span>Quality</span><span id="qualityLabel">Balanced</span></label>
-        <div id="qualityButtons" class="quality-buttons" aria-label="Quality presets">
-          <button type="button" class="btn" data-mode="0">Performance</button>
-          <button type="button" class="btn btn-primary" data-mode="1">Balanced</button>
-          <button type="button" class="btn" data-mode="2">High</button>
-        </div>
+        <label>
+          <span>Quality</span>
+          <select id="qualitySelect" aria-label="Quality presets">
+            <option value="0">Performance</option>
+            <option value="1" selected>Balanced</option>
+            <option value="2">High</option>
+          </select>
+        </label>
         <label>
           <span>Preset</span>
           <select id="presetSelect">
