@@ -57,6 +57,16 @@ extern "C"
         return GetApp().GetCurrentPaletteColor(index);
     }
 
+    int getCurrentPaletteIndex(void)
+    {
+        return GetApp().GetCurrentPaletteIndex();
+    }
+
+    int generatePatternBloom(void)
+    {
+        return GetApp().GeneratePatternBloom();
+    }
+
     void syncCanvasViewport(int cssWidth, int cssHeight, float devicePixelRatio, float qualityScale)
     {
         GetApp().SyncCanvasViewport(cssWidth, cssHeight, devicePixelRatio, qualityScale);

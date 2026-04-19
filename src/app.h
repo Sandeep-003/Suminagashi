@@ -44,8 +44,10 @@ public:
 
     int GetCurrentPaletteSize() const;
     int GetCurrentPaletteColor(int index) const;
+    int GetCurrentPaletteIndex() const;
     int GetPaletteCount() const;
     void SetPaletteIndex(int index);
+    int GeneratePatternBloom();
 
     void SetQualityMode(int mode);
     int GetQualityMode() const;
@@ -72,6 +74,7 @@ private:
     int currentN = 200;
     int interactionMode = 0;
     int nextDropRadius = 80;
+    int patternCycleIndex = 0;
     color nextDropColor;
     QualityMode qualityMode = QualityMode::Balanced;
 };

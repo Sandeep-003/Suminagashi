@@ -18,19 +18,22 @@ constexpr int kFpsHigh = 60;
 constexpr int kVertexMin = 200;
 constexpr int kVertexMax = 600;
 constexpr int kVertexStep = 10;
+constexpr float kDegToRad = 3.14159265358979323846f / 180.0f;
 
 SuminagashiApp* gApp = nullptr;
 
-color PickRandomPaletteColor()
+void AddDropWithMarbling(std::vector<Drop>& drops, Drop drop)
 {
-    const auto& palettes = ColorPalette::getAllPalettes();
-    if (palettes.empty())
+    for (auto& existingDrop : drops)
     {
-        return color(255, 255, 255, 255);
+        existingDrop.marble(drop, true);
     }
+    drops.push_back(drop);
+}
 
-    const int paletteIndex = GetRandomValue(0, static_cast<int>(palettes.size()) - 1);
-    const auto& palette = palettes[static_cast<size_t>(paletteIndex)];
+color PickRandomCurrentPaletteColor(const ColorPalette& paletteSource)
+{
+    const auto& palette = paletteSource.getCurrentPalette();
     if (palette.empty())
     {
         return color(255, 255, 255, 255);
@@ -39,6 +42,11 @@ color PickRandomPaletteColor()
     const int colorIndex = GetRandomValue(0, static_cast<int>(palette.size()) - 1);
     const auto& colorValue = palette[static_cast<size_t>(colorIndex)];
     return color(colorValue[0], colorValue[1], colorValue[2], colorValue[3]);
+}
+
+color PickFullyRandomColor()
+{
+    return color(GetRandomValue(0, 255), GetRandomValue(0, 255), GetRandomValue(0, 255), 255);
 }
 } // namespace
 
@@ -126,13 +134,21 @@ void SuminagashiApp::HandleInput()
 
     const int mouseX = GetMouseX();
     const int mouseY = GetMouseY();
+    int dropRadius = nextDropRadius;
     color dropColor = nextDropColor;
+
     if (interactionMode == 2)
     {
-        dropColor = PickRandomPaletteColor();
+        dropRadius = GetRandomValue(kMinDropRadius, kMaxDropRadius);
+        dropColor = PickRandomCurrentPaletteColor(colorGenerator);
+    }
+    else if (interactionMode == 3)
+    {
+        dropRadius = GetRandomValue(kMinDropRadius, kMaxDropRadius);
+        dropColor = PickFullyRandomColor();
     }
 
-    Drop drop(static_cast<float>(mouseX), static_cast<float>(mouseY), dropColor, nextDropRadius, currentN);
+    Drop drop(static_cast<float>(mouseX), static_cast<float>(mouseY), dropColor, dropRadius, currentN);
 
     if (interactionMode == 0)
     {
@@ -146,7 +162,11 @@ void SuminagashiApp::HandleInput()
     }
     else if (interactionMode == 2)
     {
-        drop.setTargetColor(PickRandomPaletteColor(), 0.45f);
+        drop.setTargetColor(PickRandomCurrentPaletteColor(colorGenerator), 0.45f);
+    }
+    else if (interactionMode == 3)
+    {
+        drop.setTargetColor(PickFullyRandomColor(), 0.45f);
     }
 
     for (auto& existingDrop : drops)
@@ -221,7 +241,12 @@ void SuminagashiApp::DrawFrame()
     }
     else if (interactionMode == 2)
     {
-        modeText = "Mode: Random";
+        modeText = "Mode: Random Palette";
+        modeColor = BLUE;
+    }
+    else if (interactionMode == 3)
+    {
+        modeText = "Mode: Random Full";
         modeColor = BLUE;
     }
     DrawText(modeText, 20, 50, 20, modeColor);
@@ -240,7 +265,7 @@ void SuminagashiApp::ToggleTineMode(int on)
 
 void SuminagashiApp::SetInteractionMode(int mode)
 {
-    interactionMode = std::clamp(mode, 0, 2);
+    interactionMode = std::clamp(mode, 0, 3);
 }
 
 void SuminagashiApp::ApplyTineAt(float x, float strength, float sharpness)
@@ -282,6 +307,11 @@ int SuminagashiApp::GetCurrentPaletteColor(int index) const
     return ((colorValue[0] & 0xFF) << 24) | ((colorValue[1] & 0xFF) << 16) | ((colorValue[2] & 0xFF) << 8) | (colorValue[3] & 0xFF);
 }
 
+int SuminagashiApp::GetCurrentPaletteIndex() const
+{
+    return static_cast<int>(colorGenerator.getCurrentPaletteIndex());
+}
+
 int SuminagashiApp::GetPaletteCount() const
 {
     return static_cast<int>(colorGenerator.getPaletteCount());
@@ -291,6 +321,141 @@ void SuminagashiApp::SetPaletteIndex(int index)
 {
     colorGenerator.setCurrentPaletteIndex(static_cast<size_t>(std::max(index, 0)));
     EnsureDefaultNextDropColor();
+}
+
+int SuminagashiApp::GeneratePatternBloom()
+{
+    const int paletteCount = GetPaletteCount();
+    if (paletteCount > 0)
+    {
+        const int randomPalette = GetRandomValue(0, paletteCount - 1);
+        SetPaletteIndex(randomPalette);
+    }
+
+    drops.clear();
+
+    const int width = std::max(1, metrics.renderWidth > 0 ? metrics.renderWidth : GetRenderWidth());
+    const int height = std::max(1, metrics.renderHeight > 0 ? metrics.renderHeight : GetRenderHeight());
+    const float w = static_cast<float>(width);
+    const float h = static_cast<float>(height);
+    const float cx = w * 0.5f;
+    const float cy = h * 0.5f;
+    const float minDim = std::min(w, h);
+
+    auto addDrop = [&](float x, float y, float radius)
+    {
+        if (x < -radius || x > w + radius || y < -radius || y > h + radius)
+        {
+            return;
+        }
+
+        const int clampedRadius = std::clamp(static_cast<int>(std::lround(radius)), kMinDropRadius, kMaxDropRadius);
+        const color baseColor = PickRandomCurrentPaletteColor(colorGenerator);
+        Drop drop(x, y, baseColor, clampedRadius, currentN);
+        drop.setTargetColor(PickRandomCurrentPaletteColor(colorGenerator), 0.35f + static_cast<float>(GetRandomValue(0, 20)) / 100.0f);
+        AddDropWithMarbling(drops, drop);
+    };
+
+    const int patternId = patternCycleIndex % 5;
+    patternCycleIndex += 1;
+
+    switch (patternId)
+    {
+    case 0:
+    {
+        const int count = 260;
+        const float scale = minDim / 28.0f;
+        for (int i = 0; i < count; ++i)
+        {
+            const float angle = static_cast<float>(i) * 137.50776f * kDegToRad;
+            const float radial = scale * std::sqrt(static_cast<float>(i));
+            const float x = cx + radial * std::cos(angle);
+            const float y = cy + radial * std::sin(angle);
+            const float radius = minDim * (0.007f + 0.028f * (0.5f + 0.5f * std::sin(static_cast<float>(i) * 0.23f)));
+            addDrop(x, y, radius);
+        }
+        break;
+    }
+    case 1:
+    {
+        const int count = 220;
+        const float phase = static_cast<float>(GetRandomValue(0, 314)) / 100.0f;
+        for (int i = 0; i < count; ++i)
+        {
+            const float t = (static_cast<float>(i) / static_cast<float>(count - 1)) * 6.0f * 3.14159265f;
+            const float x = cx + (w * 0.42f) * std::sin(3.0f * t + phase) + static_cast<float>(GetRandomValue(-14, 14));
+            const float y = cy + (h * 0.34f) * std::sin(4.0f * t) + static_cast<float>(GetRandomValue(-10, 10));
+            const float radius = minDim * (0.009f + 0.03f * (0.5f + 0.5f * std::cos(5.0f * t)));
+            addDrop(x, y, radius);
+        }
+        break;
+    }
+    case 2:
+    {
+        const int ringCount = 11;
+        const float ringStep = (minDim * 0.44f) / static_cast<float>(ringCount);
+        for (int ring = 1; ring <= ringCount; ++ring)
+        {
+            const int points = 8 + ring * 4;
+            for (int p = 0; p < points; ++p)
+            {
+                const float theta = (static_cast<float>(p) / static_cast<float>(points)) * 2.0f * 3.14159265f;
+                const float wave = minDim * 0.08f * std::sin(6.0f * theta + static_cast<float>(ring) * 0.65f);
+                const float distance = static_cast<float>(ring) * ringStep + wave;
+                const float x = cx + distance * std::cos(theta);
+                const float y = cy + distance * std::sin(theta);
+                const float radius = minDim * (0.006f + 0.024f * (1.0f - static_cast<float>(ring) / static_cast<float>(ringCount + 2)));
+                addDrop(x, y, radius);
+            }
+        }
+        break;
+    }
+    case 3:
+    {
+        const int cols = 16;
+        const int rows = 11;
+        const float stepX = w / static_cast<float>(cols + 1);
+        const float stepY = h / static_cast<float>(rows + 1);
+        for (int row = 0; row < rows; ++row)
+        {
+            for (int col = 0; col < cols; ++col)
+            {
+                const float fx = static_cast<float>(col + 1);
+                const float fy = static_cast<float>(row + 1);
+                const float waveX = std::sin(fy * 0.9f + static_cast<float>(col) * 0.21f) * stepX * 0.32f;
+                const float waveY = std::cos(fx * 0.8f + static_cast<float>(row) * 0.17f) * stepY * 0.32f;
+                const float x = fx * stepX + waveX;
+                const float y = fy * stepY + waveY;
+                const float radius = minDim * (0.008f + 0.025f * (0.5f + 0.5f * std::sin((fx + fy) * 0.7f)));
+                addDrop(x, y, radius);
+            }
+        }
+        break;
+    }
+    case 4:
+    default:
+    {
+        const int arms = 5;
+        const int pointsPerArm = 64;
+        for (int arm = 0; arm < arms; ++arm)
+        {
+            const float armOffset = static_cast<float>(arm) * (2.0f * 3.14159265f / static_cast<float>(arms));
+            for (int i = 0; i < pointsPerArm; ++i)
+            {
+                const float t = static_cast<float>(i) / static_cast<float>(pointsPerArm - 1);
+                const float angle = t * 7.0f * 3.14159265f + armOffset;
+                const float distance = minDim * (0.06f + 0.43f * t) + minDim * 0.07f * std::sin(8.0f * t + static_cast<float>(arm));
+                const float x = cx + distance * std::cos(angle);
+                const float y = cy + distance * std::sin(angle);
+                const float radius = minDim * (0.009f + 0.03f * (1.0f - t));
+                addDrop(x, y, radius);
+            }
+        }
+        break;
+    }
+    }
+
+    return patternId;
 }
 
 void SuminagashiApp::SetQualityMode(int mode)
