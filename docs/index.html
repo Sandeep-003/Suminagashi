@@ -45,7 +45,7 @@
       background: rgba(26, 26, 26, 0.95);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
-      padding: 1rem 0;
+      padding: 0.65rem 0;
       position: fixed;
       top: 0;
       width: 100%;
@@ -68,12 +68,12 @@
       gap: 1rem;
       font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
-      font-size: 1.5rem;
+      font-size: 1.1rem;
     }
 
     .logo i {
       color: var(--accent);
-      font-size: 2rem;
+      font-size: 1.5rem;
     }
 
     .nav-links {
@@ -110,14 +110,14 @@
 
     /* Main Content */
     .main-content {
-      margin-top: 80px;
+      margin-top: 62px;
       min-height: calc(100vh - 160px);
-      padding: 2rem;
+      padding: 1rem;
     }
 
     .hero {
       text-align: center;
-      padding: 3rem 0 1.5rem;
+      padding: 1rem 0 0.4rem;
       background: var(--gradient);
       background-clip: text;
       -webkit-background-clip: text;
@@ -125,17 +125,17 @@
     }
 
     .hero h1 {
-      font-size: 3.5rem;
+      font-size: 2rem;
       font-weight: 700;
-      margin-bottom: 1rem;
+      margin-bottom: 0.35rem;
       font-family: 'JetBrains Mono', monospace;
     }
 
     .hero p {
-      font-size: 1rem;
+      font-size: 0.85rem;
       color: var(--text-secondary);
-      max-width: 520px;
-      margin: 0 auto 1.5rem;
+      max-width: 680px;
+      margin: 0 auto 0.7rem;
       -webkit-text-fill-color: var(--text-secondary);
       line-height: 1.4;
     }
@@ -143,8 +143,8 @@
     .controls {
       display: flex;
       justify-content: center;
-      gap: 1rem;
-      margin-bottom: 2rem;
+      gap: 0.55rem;
+      margin-bottom: 0.9rem;
       flex-wrap: wrap;
     }
 
@@ -152,8 +152,8 @@
       display: flex;
       flex-direction: column;
       gap: 0.45rem;
-      min-width: 210px;
-      padding: 0.75rem 0.85rem;
+      min-width: 196px;
+      padding: 0.55rem 0.65rem;
       border: 1px solid var(--border);
       border-radius: 10px;
       background: var(--bg-secondary);
@@ -218,7 +218,7 @@
       background: var(--bg-secondary);
       border: 1px solid var(--border);
       color: var(--text-primary);
-      padding: 0.75rem 1.5rem;
+      padding: 0.5rem 0.8rem;
       border-radius: 8px;
       font-family: 'JetBrains Mono', monospace;
       font-weight: 500;
@@ -227,7 +227,7 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 0.9rem;
+      font-size: 0.78rem;
     }
 
     .btn:hover {
@@ -265,7 +265,7 @@
       margin: 0 auto;
       background: var(--bg-secondary);
       border-radius: 12px;
-      padding: 1rem;
+      padding: 0.7rem;
       border: 1px solid var(--border);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       position: relative;
@@ -329,10 +329,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem 0;
+      padding: 0.35rem 0;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
+      font-size: 0.68rem;
       color: var(--text-secondary);
+      gap: 0.6rem;
     }
 
     .status-indicator {
@@ -364,7 +365,7 @@
     /* Instructions */
     .instructions {
       max-width: 800px;
-      margin: 3rem auto;
+      margin: 1.6rem auto;
       background: var(--bg-secondary);
       border-radius: 12px;
       border: 1px solid var(--border);
@@ -373,7 +374,7 @@
 
     .instructions-header {
       background: var(--bg-tertiary);
-      padding: 1rem 1.5rem;
+      padding: 0.8rem 1rem;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
@@ -385,15 +386,15 @@
     }
 
     .instructions-content {
-      padding: 1.5rem;
+      padding: 0.9rem;
     }
 
     .instruction-item {
       display: flex;
       align-items: flex-start;
       gap: 1rem;
-      margin-bottom: 1rem;
-      padding: 1rem;
+      margin-bottom: 0.6rem;
+      padding: 0.65rem;
       background: var(--bg-primary);
       border-radius: 8px;
       border-left: 3px solid var(--accent);
@@ -405,7 +406,7 @@
 
     .instruction-icon {
       color: var(--accent);
-      font-size: 1.2rem;
+      font-size: 1rem;
       margin-top: 0.2rem;
     }
 
@@ -458,7 +459,7 @@
       }
 
       .hero h1 {
-        font-size: 2.5rem;
+        font-size: 1.6rem;
       }
 
       .controls {
@@ -466,12 +467,12 @@
       }
 
       .btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
+        padding: 0.45rem 0.7rem;
+        font-size: 0.74rem;
       }
 
       .main-content {
-        padding: 1rem;
+        padding: 0.7rem;
       }
     }
 
@@ -734,100 +735,57 @@
       </div>
       <div class="instructions-content">
         <div class="instruction-item">
+          <i class="fas fa-wand-magic-sparkles instruction-icon"></i>
+          <div>
+            <strong>Pattern Bloom</strong>
+            <p>Use <strong>Pattern Bloom</strong> to auto-fill the canvas with mathematically generated drops. Every click rotates to a new pattern style with varied drop sizes and palette combinations.</p>
+          </div>
+        </div>
+        <div class="instruction-item">
           <i class="fas fa-mouse-pointer instruction-icon"></i>
           <div>
-            <strong>Two Interaction Modes</strong>
-            <p><strong>Drops Mode:</strong> Click to create new drops with random themed colors. <strong>Tine Mode:</strong> Click to carve elegant vertical deformations into existing patterns. Press <kbd>T</kbd> key to toggle between modes.</p>
+            <strong>Interaction Modes</strong>
+            <p><strong>Drops:</strong> paint with your selected palette color. <strong>Random Palette:</strong> random radius and palette color. <strong>Random Full:</strong> random radius and any RGB color. <strong>Tine:</strong> carve marbling lines. Press <kbd>T</kbd> to toggle Tine quickly.</p>
           </div>
         </div>
         <div class="instruction-item">
           <i class="fas fa-arrows-alt-v instruction-icon"></i>
           <div>
-            <strong>Vertical Tine Tool</strong>
-            <p>In Tine mode, adjust <strong>Strength</strong> (0-400) for displacement intensity and <strong>Sharpness</strong> (1-256) for influence radius. Features smooth quintic falloff and diminishing returns to prevent over-carving.</p>
+            <strong>Tine Controls</strong>
+            <p>Adjust <strong>Strength</strong> for displacement force and <strong>Sharpness</strong> for tine influence radius. Drag across the canvas in Tine mode for smooth carved waves.</p>
           </div>
         </div>
         <div class="instruction-item">
           <i class="fas fa-palette instruction-icon"></i>
           <div>
-            <strong>Dynamic Color Palettes</strong>
-            <p>Enjoy 15 carefully curated color palettes including Sunset, Ocean, Traditional Japanese, Turkish Ebru,
-              and more artistic themes.</p>
+            <strong>Palette Workflow</strong>
+            <p>Choose a <strong>Palette Set</strong>, then choose a color swatch for the next drop. Swatches select color only; they do not switch the full palette set.</p>
           </div>
         </div>
-        <div class="instruction-item">
-          <i class="fas fa-magic instruction-icon"></i>
-          <div>
-            <strong>Watch the Magic</strong>
-            <!-- JavaScript -->
-            <script>
-              var Module = {
-                print: (function () {
-                  var element = document.getElementById('output');
-                  if (element) element.value = '';
-                  return function (text) {
-                    if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-                    console.log(text);
-                    if (element) {
-                      element.value += text + "\n";
-                      element.scrollTop = element.scrollHeight;
-                    }
-                  };
-                })(),
-                canvas: (function () {
-                  return document.getElementById('canvas');
-                })(),
-                webglContextAttributes: {
-                  preserveDrawingBuffer: true,
-                  antialias: true,
-                  alpha: true
-                }
-              };
-            </script>
-            <script src="app.js"></script>
-            <script src="suminasashi.js?v=20260420"></script>
-          Module.ccall('setNextDropColor', null, ['number','number','number','number'], [r,g,b,a]);
-        });
-        if(i===0){ btn.style.outline='2px solid var(--accent)'; selectedColorBtn=btn; Module.ccall('setNextDropColor', null, ['number','number','number','number'], [r,g,b,a]); }
-        paletteContainer.appendChild(btn);
-      }
-    }
-    // Rebuild palette after runtime init (in case palette selected randomly)
-    function afterRuntimeInit(){ buildPalette(); setMode('drops'); updateSliderLabels(); Module.ccall('setNextDropRadius', null, ['number'], [parseInt(radiusSlider.value)]); }
-    Module.onRuntimeInitialized = (function(orig){ return function(){ if(orig) orig(); afterRuntimeInit(); };})(Module.onRuntimeInitialized);
+      </div>
+    </section>
+  </main>
 
-    // ---------------- Tine Interaction (applyTineAt bridge) ----------------
-    (function initTineInput(){
-      const canvas = document.getElementById('canvas');
-      if(!canvas) return;
-      let isDown = false;
-      let lastX = -9999;
-      const MIN_DELTA = 4; // only re-apply while dragging if moved this many px
-      function invokeTine(clientX){
-        if(currentMode !== 1) return;
-        if(!(Module && Module.ccall)) return;
-        const rect = canvas.getBoundingClientRect();
-        // Scale to canvas backing store size (Emscripten sets width/height attributes)
-        const canvasX = (clientX - rect.left) * (canvas.width / rect.width);
-        const strength = parseFloat(strengthSlider.value) || 0;
-        const sharpness = parseFloat(sharpnessSlider.value) || 1;
-        Module.ccall('applyTineAt', null, ['number','number','number'], [canvasX, strength, sharpness]);
-      }
-      canvas.addEventListener('mousedown', e=>{ if(e.button!==0) return; isDown=true; lastX=-9999; invokeTine(e.clientX); });
-      window.addEventListener('mouseup', ()=>{ isDown=false; });
-      canvas.addEventListener('mousemove', e=>{ if(!isDown) return; const rect = canvas.getBoundingClientRect(); const x = (e.clientX - rect.left) * (canvas.width / rect.width); if(Math.abs(x-lastX) >= MIN_DELTA){ invokeTine(e.clientX); lastX = x; } });
-      canvas.addEventListener('mouseleave', ()=>{ isDown=false; });
-    })();
+  <!-- Footer -->
+  <footer class="footer" id="about">
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="#instructions">How It Works</a>
+        <a href="#gallery">Gallery</a>
+        <a href="https://github.com/Sandeep-003/Suminagashi/" target="_blank">Source Code</a>
+      </div>
+      <p class="footer-text">Suminagashi Digital Marbling • Built with C++, Raylib and WebAssembly</p>
+    </div>
+  </footer>
 
-    // ---------------- Keyboard Shortcut (T toggles mode) ----------------
-    window.addEventListener('keydown', (e)=>{
-      if(e.key === 't' || e.key === 'T'){
-        setMode(currentMode===0 ? 'tine' : 'drops');
-      }
-    });
-  </script>
-  <script async src="suminasashi.js"></script>
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <i class="fas fa-check"></i>
+    <span id="toast-message">Operation completed</span>
+  </div>
+
+  <script src="app.js?v=20260420"></script>
+  <script async src="suminasashi.js?v=20260420"></script>
 </body>
 
 </html>
-<!-- hi -->

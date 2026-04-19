@@ -533,6 +533,14 @@
   }
 
   function triggerPatternBloom() {
+    if (!state.runtimeReady) {
+      showToast('Runtime is still loading', 'error');
+      return;
+    }
+
+    // Ensure native render metrics match current canvas size before generating.
+    syncLayout('pattern-bloom-pre');
+
     if (!hasNativeExport('generatePatternBloom')) {
       showToast('Pattern Bloom is not ready', 'error');
       return;

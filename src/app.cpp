@@ -359,11 +359,30 @@ int SuminagashiApp::GeneratePatternBloom()
     const int patternId = patternCycleIndex % 5;
     patternCycleIndex += 1;
 
+    // Base layer: cover the whole canvas first, then add a mathematical pattern on top.
+    const int baseCols = std::max(12, static_cast<int>(std::lround(w / 82.0f)));
+    const int baseRows = std::max(8, static_cast<int>(std::lround(h / 82.0f)));
+    const float cellW = w / static_cast<float>(baseCols);
+    const float cellH = h / static_cast<float>(baseRows);
+    const float baseRadius = minDim * 0.028f;
+    for (int row = 0; row < baseRows; ++row)
+    {
+        for (int col = 0; col < baseCols; ++col)
+        {
+            const float jitterX = static_cast<float>(GetRandomValue(-12, 12));
+            const float jitterY = static_cast<float>(GetRandomValue(-12, 12));
+            const float x = (static_cast<float>(col) + 0.5f) * cellW + jitterX;
+            const float y = (static_cast<float>(row) + 0.5f) * cellH + jitterY;
+            const float radius = baseRadius * (0.85f + static_cast<float>(GetRandomValue(0, 35)) / 100.0f);
+            addDrop(x, y, radius);
+        }
+    }
+
     switch (patternId)
     {
     case 0:
     {
-        const int count = 260;
+        const int count = 420;
         const float scale = minDim / 28.0f;
         for (int i = 0; i < count; ++i)
         {
@@ -378,7 +397,7 @@ int SuminagashiApp::GeneratePatternBloom()
     }
     case 1:
     {
-        const int count = 220;
+        const int count = 340;
         const float phase = static_cast<float>(GetRandomValue(0, 314)) / 100.0f;
         for (int i = 0; i < count; ++i)
         {
@@ -392,7 +411,7 @@ int SuminagashiApp::GeneratePatternBloom()
     }
     case 2:
     {
-        const int ringCount = 11;
+        const int ringCount = 14;
         const float ringStep = (minDim * 0.44f) / static_cast<float>(ringCount);
         for (int ring = 1; ring <= ringCount; ++ring)
         {
@@ -412,8 +431,8 @@ int SuminagashiApp::GeneratePatternBloom()
     }
     case 3:
     {
-        const int cols = 16;
-        const int rows = 11;
+        const int cols = 20;
+        const int rows = 14;
         const float stepX = w / static_cast<float>(cols + 1);
         const float stepY = h / static_cast<float>(rows + 1);
         for (int row = 0; row < rows; ++row)
@@ -435,8 +454,8 @@ int SuminagashiApp::GeneratePatternBloom()
     case 4:
     default:
     {
-        const int arms = 5;
-        const int pointsPerArm = 64;
+        const int arms = 6;
+        const int pointsPerArm = 90;
         for (int arm = 0; arm < arms; ++arm)
         {
             const float armOffset = static_cast<float>(arm) * (2.0f * 3.14159265f / static_cast<float>(arms));
