@@ -148,6 +148,72 @@
       flex-wrap: wrap;
     }
 
+    .control-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      min-width: 210px;
+      padding: 0.75rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-secondary);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    .control-card label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    .control-card input[type="text"],
+    .control-card select {
+      width: 100%;
+      padding: 0.5rem 0.65rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+
+    .control-card input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+    }
+
+    .quality-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.35rem;
+    }
+
+    .quality-buttons button {
+      justify-content: center;
+      padding: 0.55rem 0.6rem;
+      font-size: 0.75rem;
+    }
+
+    .palette-swatch {
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: transform 0.2s ease, outline 0.2s ease;
+    }
+
+    .palette-swatch.selected {
+      outline: 2px solid var(--accent);
+      transform: translateY(-1px);
+    }
+
     .btn {
       background: var(--bg-secondary);
       border: 1px solid var(--border);
@@ -204,6 +270,9 @@
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
     }
 
     .canvas-container::before {
@@ -222,8 +291,38 @@
       border-radius: 8px;
       background: #f8f9fa;
       border: 1px solid var(--border);
+      width: 100%;
       max-width: 100%;
+      aspect-ratio: 3 / 2;
       height: auto;
+    }
+
+    .runtime-status {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .status-pill {
+      padding: 0.6rem 0.75rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+    }
+
+    .status-pill span {
+      display: block;
+      color: var(--text-secondary);
+      margin-bottom: 0.25rem;
+    }
+
+    .status-pill strong {
+      display: block;
+      color: var(--text-primary);
+      font-size: 0.86rem;
+      word-break: break-word;
     }
 
     .canvas-info {
@@ -501,21 +600,28 @@
 
     <!-- Controls -->
     <div class="controls">
-      <button class="btn btn-primary" onclick="clearCanvas()">
+      <button id="clearButton" class="btn btn-primary">
         <i class="fas fa-eraser"></i> Clear Canvas
       </button>
-      <button class="btn btn-success" onclick="saveScreenshot()">
+      <button id="screenshotButton" class="btn btn-success">
         <i class="fas fa-camera"></i> Save Screenshot
       </button>
-      <button class="btn" onclick="toggleFullscreen()">
+      <button id="fullscreenButton" class="btn">
         <i class="fas fa-expand"></i> Fullscreen
       </button>
-      <button class="btn" onclick="showInfo()">
+      <button id="infoButton" class="btn">
         <i class="fas fa-info-circle"></i> Info
       </button>
-      <button id="modeDrops" class="btn" onclick="setMode('drops')"><i class="fas fa-circle"></i> Drops</button>
-      <button id="modeTine" class="btn" onclick="setMode('tine')"><i class="fas fa-arrows-alt-v"></i> Tine</button>
-      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:180px;padding:4px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);font-size:0.7rem;">
+      <button id="resetViewButton" class="btn">
+        <i class="fas fa-undo"></i> Reset View
+      </button>
+      <button id="fitCanvasButton" class="btn">
+        <i class="fas fa-arrows-alt"></i> Fit Canvas
+      </button>
+      <button id="modeDrops" class="btn"><i class="fas fa-circle"></i> Drops</button>
+      <button id="modeRandom" class="btn"><i class="fas fa-random"></i> Random</button>
+      <button id="modeTine" class="btn"><i class="fas fa-arrows-alt-v"></i> Tine</button>
+      <div class="control-card">
         <label style="width:100%;font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;align-items:center;gap:6px;">
           <span>Strength <span id="strengthVal">80</span></span>
           <input id="strengthSlider" type="range" min="0" max="400" value="80" step="1" style="flex:1;margin-left:6px;">
@@ -525,12 +631,37 @@
           <input id="sharpnessSlider" type="range" min="1" max="256" value="32" step="1" style="flex:1;margin-left:6px;">
         </label>
       </div>
-      <div style="display:flex;flex-direction:column;gap:4px;min-width:190px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);font-size:0.7rem;">
-        <label style="display:flex;justify-content:space-between;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;">
+      <div class="control-card">
+        <label style="font-family:'JetBrains Mono',monospace;">
           <span>Drop Radius <span id="radiusVal">80</span></span>
           <input id="radiusSlider" type="range" min="5" max="400" value="80" step="1" style="flex:1;">
         </label>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;" id="paletteColors" aria-label="Palette colors"></div>
+        <div id="paletteColors" style="display:flex;flex-wrap:wrap;gap:4px;" aria-label="Palette colors"></div>
+      </div>
+      <div class="control-card">
+        <label><span>Quality</span><span id="qualityLabel">Balanced</span></label>
+        <div id="qualityButtons" class="quality-buttons" aria-label="Quality presets">
+          <button type="button" class="btn" data-mode="0">Performance</button>
+          <button type="button" class="btn btn-primary" data-mode="1">Balanced</button>
+          <button type="button" class="btn" data-mode="2">High</button>
+        </div>
+        <label>
+          <span>Preset</span>
+          <select id="presetSelect">
+            <option value="balanced">Balanced Flow</option>
+            <option value="sunset">Sunset Wash</option>
+            <option value="calm">Calm Marble</option>
+            <option value="contrast">Contrast Ripple</option>
+          </select>
+        </label>
+        <label>
+          <span>Export Prefix</span>
+          <input id="exportPrefix" type="text" value="suminagashi" maxlength="48">
+        </label>
+        <label>
+          <span>Timestamp</span>
+          <input id="exportTimestamp" type="checkbox" checked>
+        </label>
       </div>
     </div>
 
@@ -541,14 +672,36 @@
     </div>
 
     <!-- Canvas Container -->
-    <div class="canvas-container">
+    <div class="canvas-container" id="canvas-container">
       <div class="canvas-info">
         <div class="status-indicator">
           <div class="status-dot"></div>
-          <span>Ready to create</span>
+          <span id="statusText">Ready to create</span>
         </div>
         <div>
-          <span>Toggle modes with T • Drops: random colors • Tine: carve patterns</span>
+          <span>Toggle modes with T • Drops: palette colors • Random: click for a random color • Tine: carve patterns</span>
+        </div>
+      </div>
+      <div class="runtime-status">
+        <div class="status-pill">
+          <span>CSS Size</span>
+          <strong id="metricCss">1200x800</strong>
+        </div>
+        <div class="status-pill">
+          <span>Render Size</span>
+          <strong id="metricRender">1200x800</strong>
+        </div>
+        <div class="status-pill">
+          <span>DPR</span>
+          <strong id="metricDpr">1.00</strong>
+        </div>
+        <div class="status-pill">
+          <span>Quality</span>
+          <strong id="metricQuality">Balanced</strong>
+        </div>
+        <div class="status-pill">
+          <span>Mode</span>
+          <strong id="metricMode">Drops</strong>
         </div>
       </div>
       <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
@@ -598,295 +751,33 @@
           <i class="fas fa-magic instruction-icon"></i>
           <div>
             <strong>Watch the Magic</strong>
-            <p>Each new drop interacts with existing ones, creating beautiful marbling effects inspired by traditional
-              suminagashi techniques.</p>
-          </div>
-        </div>
-        <div class="instruction-item">
-          <i class="fas fa-save instruction-icon"></i>
-          <div>
-            <strong>Save Your Art</strong>
-            <p>Use the "Save Screenshot" button to download your creation as a PNG image to your device.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-links">
-        <a href="https://github.com/Sandeep-003/" target="_blank">
-          <i class="fab fa-github"></i> GitHub Profile
-        </a>
-        <a href="https://github.com/Sandeep-003/Suminagashi/" target="_blank">
-          <i class="fas fa-code-branch"></i> Source Code
-        </a>
-        <a href="#" onclick="showAbout()">
-          <i class="fas fa-info"></i> About
-        </a>
-      </div>
-      <p class="footer-text">
-        Made with ❤️ by Sandeep • Built with C++, Raylib & Emscripten
-      </p>
-    </div>
-  </footer>
-
-  <!-- Toast Notification -->
-  <div class="toast" id="toast">
-    <i class="fas fa-check"></i>
-    <span id="toast-message">Screenshot saved!</span>
-  </div>
-
-  <!-- JavaScript -->
-  <script>
-    var Module = {
-      print: (function () {
-        var element = document.getElementById('output');
-        if (element) element.value = '';
-        return function (text) {
-          if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-          console.log(text);
-          if (element) {
-            element.value += text + "\n";
-            element.scrollTop = element.scrollHeight;
-          }
-        };
-      })(),
-      canvas: (function () {
-        var canvas = document.getElementById('canvas');
-        return canvas;
-      })(),
-      locateFile: function (path) {
-        if (path.endsWith('.wasm')) {
-          return 'suminasashi.wasm';
-        }
-        return path;
-      },
-      onRuntimeInitialized: function () {
-        document.getElementById('loading').style.display = 'none';
-        showToast('Suminagashi loaded successfully!', 'success');
-      },
-      // WebGL context attributes for preserving drawing buffer
-      preinitializedWebGLContext: null,
-      webglContextAttributes: {
-        preserveDrawingBuffer: true,
-        antialias: true,
-        alpha: true
-      }
-    };
-
-    // Show loading initially
-    document.getElementById('loading').style.display = 'block';
-
-    // Screenshot functionality
-    function saveScreenshot() {
-      if (typeof Module !== 'undefined' && typeof Module.ccall === 'function') {
-        Module.ccall('takeScreenshot', null, [], []);
-        showToast('Screenshot saved!', 'success');
-        setTimeout(function () {
-          var filename = 'suminagashi_screenshot.png';
-          if (Module.FS && Module.FS.findObject(filename)) {
-            var data = Module.FS.readFile(filename, { encoding: 'binary' });
-            var blob = new Blob([data], { type: 'image/png' });
-            var link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-            URL.revokeObjectURL(link.href);
-          } else {
-            showToast('Screenshot file not found', 'error');
-          }
-        }, 500); // Wait 500ms for file to be written
-      } else {
-        showToast('Screenshot feature not available', 'error');
-      }
-
-      /*
-      1 vulnerability
-        path-injection Unvalidated input in path value creation risks unintended file/directory access
-      */
-    }
-    // `suminagashi-${timestamp}.png`;
-    // Check if canvas has content
-
-
-    // Clear canvas function (if available in your C++ code)
-    function clearCanvas() {
-      // Call the C++ clearCanvas function via Emscripten
-      if (typeof Module !== 'undefined' && typeof Module.ccall === 'function') {
-        Module.ccall('clearCanvas', null, [], []);
-        showToast('Canvas cleared!', 'success');
-      } else {
-        showToast('Clear canvas feature not available', 'error');
-      }
-    }
-
-    // Fullscreen toggle
-    function toggleFullscreen() {
-      const canvas = document.getElementById('canvas');
-      if (!document.fullscreenElement) {
-        canvas.requestFullscreen().catch(err => {
-          showToast('Fullscreen not supported', 'error');
-        });
-      } else {
-        document.exitFullscreen();
-      }
-    }
-
-    // Show info
-    function showInfo() {
-      const instructions = document.getElementById('instructions');
-      instructions.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // Show about
-    function showAbout() {
-      alert('Suminagashi - Digital Paper Marbling\\n\\nAn interactive web application that recreates the ancient Japanese art of suminagashi (paper marbling) using modern web technologies.\\n\\nBuilt with C++, Raylib, and compiled to WebAssembly using Emscripten.');
-    }
-
-    // Toast notification system
-    function showToast(message, type = 'success') {
-      const toast = document.getElementById('toast');
-      const toastMessage = document.getElementById('toast-message');
-      const icon = toast.querySelector('i');
-
-      toastMessage.textContent = message;
-      toast.className = `toast ${type}`;
-
-      if (type === 'success') {
-        icon.className = 'fas fa-check';
-      } else if (type === 'error') {
-        icon.className = 'fas fa-times';
-      }
-
-      toast.classList.add('show');
-
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
-    }
-
-    // Header scroll effect
-    window.addEventListener('scroll', () => {
-      const header = document.querySelector('.header');
-      if (window.scrollY > 100) {
-        header.style.background = 'rgba(26, 26, 26, 0.98)';
-      } else {
-        header.style.background = 'rgba(26, 26, 26, 0.95)';
-      }
-    });
-
-    // Prevent right-click context menu on canvas
-    document.getElementById('canvas').addEventListener('contextmenu', function (e) {
-      e.preventDefault();
-      return false;
-    });
-
-    /* ---------------- Gallery Loader ----------------
-       Provide a list of image filenames located in docs/Gallery/.
-       Add or remove entries below to control what appears.
-       This avoids needing to enumerate the filesystem at runtime. */
-    // Gallery configuration
-    const galleryBasePath = "Gallery/"; // images live in sibling Gallery folder relative to docs/
-    // Explicit files provided by user (names kept as-is; spaces will be URI-encoded automatically)
-    const explicitFiles = [
-      'image.png',
-      'image01.png',
-      'Screenshot 2024-05-25 205720.png',
-      'Screenshot 2025-08-26 005601.png'
-    ];
-    // Generate numbered sequence for pattern PaperMarbling###.png (assume 1..20). Adjust end if more/less.
-    const paperMarblingSequence = (() => {
-      const arr = [];
-      for (let i = 1; i <= 2; i++) {
-        arr.push(`PaperMarbling${String(i).padStart(3,'0')}.png`);
-      }
-      return arr;
-    })();
-    const galleryImages = [...explicitFiles, ...paperMarblingSequence];
-
-    function initGallery() {
-      const grid = document.getElementById('gallery-grid');
-      const emptyMsg = document.getElementById('gallery-empty');
-      if (!galleryImages.length) { emptyMsg.style.display = 'block'; return; }
-      emptyMsg.style.display = 'none';
-      galleryImages.forEach(name => {
-        const cleanName = name; // keep original for alt text
-        const url = galleryBasePath + encodeURI(name);
-        const item = document.createElement('a');
-        item.href = url;
-        item.target = '_blank';
-        item.className = 'gallery-item';
-        const img = document.createElement('img');
-        img.loading = 'lazy';
-        img.alt = cleanName;
-        img.src = url;
-        item.appendChild(img);
-        grid.appendChild(item);
-      });
-    }
-    document.addEventListener('DOMContentLoaded', initGallery);
-
-    // ---------------- Interaction Mode & Tine Parameters ----------------
-    let currentMode = 0; // 0 drops, 1 tine
-    function setMode(modeName){
-      currentMode = (modeName === 'tine') ? 1 : 0;
-      if (Module && Module.ccall) {
-        // Prefer new numeric mode API if present; fallback to legacy toggle
-        if (Module['_setInteractionMode']) {
-          Module.ccall('setInteractionMode', null, ['number'], [currentMode]);
-        } else {
-          Module.ccall('toggleTineMode', null, ['number'], [currentMode===1?1:0]);
-        }
-      }
-      document.getElementById('modeDrops').classList.toggle('btn-primary', currentMode===0);
-      document.getElementById('modeTine').classList.toggle('btn-primary', currentMode===1);
-      updateStatusText(currentMode===1);
-    }
-    function updateStatusText(isTine){
-      const statusSpan = document.querySelector('.status-indicator span');
-      if(statusSpan){ statusSpan.textContent = isTine ? 'Tine mode: click to carve' : 'Ready to create'; }
-    }
-
-    // Slider elements
-    const strengthSlider = document.getElementById('strengthSlider');
-    const sharpnessSlider = document.getElementById('sharpnessSlider');
-    const radiusSlider = document.getElementById('radiusSlider');
-    const radiusVal = document.getElementById('radiusVal');
-    function updateSliderLabels(){
-      document.getElementById('strengthVal').textContent = strengthSlider.value;
-      document.getElementById('sharpnessVal').textContent = sharpnessSlider.value;
-      radiusVal.textContent = radiusSlider.value;
-    }
-    strengthSlider.addEventListener('input', updateSliderLabels);
-    sharpnessSlider.addEventListener('input', updateSliderLabels);
-    radiusSlider.addEventListener('input', ()=>{ updateSliderLabels(); if(Module && Module.ccall){ Module.ccall('setNextDropRadius', null, ['number'], [parseInt(radiusSlider.value)]);} });
-    updateSliderLabels();
-
-    // Palette color selection UI
-    const paletteContainer = document.getElementById('paletteColors');
-    let selectedColorBtn = null;
-    function rgbaFromPacked(p){ return {r:(p>>>24)&0xFF,g:(p>>>16)&0xFF,b:(p>>>8)&0xFF,a:p&0xFF}; }
-    function buildPalette(){
-      if(!(Module && Module.ccall)) return;
-      paletteContainer.innerHTML='';
-      const count = Module.ccall('getCurrentPaletteSize','number',[],[]);
-      for(let i=0;i<count;i++){
-        const packed = Module.ccall('getCurrentPaletteColor','number',['number'],[i]);
-        const {r,g,b,a} = rgbaFromPacked(packed);
-        const btn = document.createElement('button');
-        btn.type='button';
-        btn.style.width='20px';
-        btn.style.height='20px';
-        btn.style.border='1px solid var(--border)';
-        btn.style.borderRadius='4px';
-        btn.style.background=`rgba(${r},${g},${b},${a/255})`;
-        btn.title=`RGB(${r},${g},${b})`;
-        btn.addEventListener('click',()=>{
-          if(selectedColorBtn) selectedColorBtn.style.outline='none';
-          selectedColorBtn = btn; btn.style.outline='2px solid var(--accent)';
+            <!-- JavaScript -->
+            <script>
+              var Module = {
+                print: (function () {
+                  var element = document.getElementById('output');
+                  if (element) element.value = '';
+                  return function (text) {
+                    if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                    console.log(text);
+                    if (element) {
+                      element.value += text + "\n";
+                      element.scrollTop = element.scrollHeight;
+                    }
+                  };
+                })(),
+                canvas: (function () {
+                  return document.getElementById('canvas');
+                })(),
+                webglContextAttributes: {
+                  preserveDrawingBuffer: true,
+                  antialias: true,
+                  alpha: true
+                }
+              };
+            </script>
+            <script src="app.js"></script>
+            <script src="suminasashi.js?v=20260420"></script>
           Module.ccall('setNextDropColor', null, ['number','number','number','number'], [r,g,b,a]);
         });
         if(i===0){ btn.style.outline='2px solid var(--accent)'; selectedColorBtn=btn; Module.ccall('setNextDropColor', null, ['number','number','number','number'], [r,g,b,a]); }

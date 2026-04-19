@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
 project(suminasashi)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 cmake_policy(SET CMP0054 NEW)
 
 # Set policy to allow older CMake versions in dependencies
@@ -37,25 +40,27 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os")    
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os")
 
-# Export JS-callable functions (add tine features) and runtime methods
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sEXPORTED_FUNCTIONS=\"['_display','_clearCanvas','_main','_takeScreenshot','_toggleTineMode','_applyTineAt','_setTineParams','_setInteractionMode','_setNextDropRadius','_setNextDropColor','_getCurrentPaletteSize','_getCurrentPaletteColor']\" -sEXPORTED_RUNTIME_METHODS=\"['ccall','cwrap']\" -sALLOW_MEMORY_GROWTH=1")
-
-# Additional Emscripten flags for WebGL and screenshot support
 if(EMSCRIPTEN)
+    # Export JS-callable functions and runtime methods.
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sEXPORTED_FUNCTIONS=\"['_main','_display','_takeScreenshot','_clearCanvas','_toggleTineMode','_setInteractionMode','_applyTineAt','_setTineParams','_setNextDropRadius','_setNextDropColor','_getCurrentPaletteSize','_getCurrentPaletteColor','_syncCanvasViewport','_setQualityMode','_getQualityMode','_getPaletteCount','_setPaletteIndex']\" -sEXPORTED_RUNTIME_METHODS=\"['ccall','cwrap']\" -sALLOW_MEMORY_GROWTH=1")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sMAX_WEBGL_VERSION=2 -sMIN_WEBGL_VERSION=1 -sFULL_ES2=1 -sOFFSCREENCANVAS_SUPPORT=1")
 endif()
 
 add_executable(suminasashi
-    suminasashi.cpp 
-    Drops.cpp 
-    colors.cpp
+    src/main.cpp
+    src/app.cpp
+    src/web_exports.cpp
+    src/screenshot.cpp
+    src/Drops.cpp
+    src/colors.cpp
 )
-target_compile_options(suminasashi PUBLIC "-std=c++20")
-set_target_properties(suminasashi PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/web) 
 
-set_target_properties(suminasashi PROPERTIES SUFFIX ".js")
-target_link_options(suminasashi PUBLIC "-sUSE_GLFW=3" "-sMAX_WEBGL_VERSION=2" "-sMIN_WEBGL_VERSION=1" "-sFULL_ES2=1")
+if(EMSCRIPTEN)
+    set_target_properties(suminasashi PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/web)
+    set_target_properties(suminasashi PROPERTIES SUFFIX ".js")
+    target_link_options(suminasashi PUBLIC "-sUSE_GLFW=3" "-sMAX_WEBGL_VERSION=2" "-sMIN_WEBGL_VERSION=1" "-sFULL_ES2=1")
+endif()
 target_link_libraries(suminasashi raylib)

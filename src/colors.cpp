@@ -209,6 +209,26 @@ size_t ColorPalette::getCurrentPaletteIndex() const
     return currentPaletteIndex;
 }
 
+// Select a palette explicitly by index.
+void ColorPalette::setCurrentPaletteIndex(size_t index)
+{
+    initializePalettes();
+    if (palettes.empty())
+    {
+        currentPaletteIndex = 0;
+        return;
+    }
+
+    currentPaletteIndex = index % palettes.size();
+}
+
+// Number of available palettes.
+size_t ColorPalette::getPaletteCount() const
+{
+    initializePalettes();
+    return palettes.size();
+}
+
 // Get the current palette
 const ColorPalette::Palette &ColorPalette::getCurrentPalette() const
 {

@@ -35,6 +35,9 @@ Suminagashi (墨流し, "floating ink") is a traditional Japanese paper marbling
 - **Real-time Marbling Simulation**: Drops interact to create organic patterns
 - **Screenshot Capture**: Save your artwork as PNG images
 - **Responsive Design**: Works on desktop, tablet, and mobile
+- **Quality Modes**: Performance, Balanced, and High DPR presets for browser rendering
+- **Layout Sync**: Canvas CSS size and framebuffer size stay synchronized on resize and orientation changes
+- **Autosave**: Restores the last used controls, preset, and export options on reload
 
 ### 🛠️ Technical Features
 - **WebAssembly Performance**: Compiled C++ code for near-native speed
@@ -51,13 +54,18 @@ Suminagashi (墨流し, "floating ink") is a traditional Japanese paper marbling
 ```
 suminasashi_web_final/
 ├── 📁 src/
-│   ├── suminasashi.cpp      # Main application loop
+│   ├── main.cpp             # Entry point and loop selection
+│   ├── app.cpp              # App lifecycle, drawing, viewport sync
+│   ├── app.h                # App interface and runtime state
+│   ├── web_exports.cpp      # JS-callable C exports
+│   ├── screenshot.cpp       # Native screenshot helpers
 │   ├── Drops.cpp            # Drop physics and rendering
 │   ├── drops.h              # Drop class declaration
 │   ├── colors.cpp           # Color palette management
 │   └── colors.h             # ColorPalette class declaration
 ├── 📁 docs/                 # Web deployment
 │   ├── index.html           # Modern web interface
+│   ├── app.js               # Browser runtime bridge and layout manager
 │   ├── suminasashi.js       # Compiled WebAssembly
 │   └── suminasashi.wasm     # Binary WebAssembly module
 ├── 📁 build/                # Build artifacts
@@ -109,6 +117,16 @@ suminasashi_web_final/
    cp web/suminasashi.wasm ../docs/
    ```
 
+  The browser shell reads the wasm bundle with a cache-busting query string, so replace both files together during deployment.
+
+### GitHub Pages Deploy
+
+The repository is set up to publish from GitHub Actions using the site in `docs/`.
+
+1. Push to `main` or run the workflow manually from the Actions tab.
+2. The workflow builds the web target with Emscripten, copies the generated `suminasashi.js` and `suminasashi.wasm` into a temporary Pages site, and deploys it.
+3. In the repository settings, enable Pages with the source set to GitHub Actions if it is not already enabled.
+
 ### Development Build (Native)
 
 For faster development cycles, you can build natively:
@@ -138,6 +156,10 @@ make
 - **Screenshot Button**: Save current canvas as PNG
 - **Clear Button**: Reset the canvas
 - **Fullscreen Button**: Toggle fullscreen mode
+- **Quality Buttons**: Switch between Performance, Balanced, and High canvas scaling
+- **Preset Menu**: Load curated palette and control presets
+- **Export Options**: Set filename prefix and timestamped export naming
+- **Reset View / Fit Canvas**: Re-sync the browser layout or restore the current preset
 
 ## 🎨 Color Palettes
 

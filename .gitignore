@@ -1,0 +1,48 @@
+# Build outputs
+build/
+build-*/
+site/
+# docs/suminasashi.js
+# docs/suminasashi.wasm
+
+# CMake artifacts
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+Makefile
+install_manifest.txt
+
+# Compiler outputs
+*.o
+*.obj
+*.a
+*.lib
+*.dll
+*.exe
+*.pdb
+*.ilk
+*.exp
+*.idb
+*.log
+*.tlog
+*.recipe
+
+# IDE and editor state
+.vs/
+.idea/
+*.user
+*.suo
+*.ncb
+*.opensdf
+*.sdf
+ipch/
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+
+# Local cache directories
+.cache/
+.vscode/*.code-workspace

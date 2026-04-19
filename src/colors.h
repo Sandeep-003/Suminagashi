@@ -28,6 +28,12 @@ public:
     // Get the current palette index
     size_t getCurrentPaletteIndex() const;
 
+    // Select a palette explicitly by index.
+    void setCurrentPaletteIndex(size_t index);
+
+    // Number of available palettes.
+    size_t getPaletteCount() const;
+
     // Get the current palette
     const Palette& getCurrentPalette() const;
 
