@@ -14,20 +14,11 @@
     contrast: { label: 'Contrast Ripple', paletteIndex: 6, qualityMode: 1, radius: 120, strength: 140, sharpness: 64, mode: 'tine' }
   };
 
-  const PATTERN_BLOOM_NAMES = [
-    'Golden Spiral Bloom',
-    'Lissajous Weave',
-    'Petal Rings',
-    'Harmonic Lattice',
-    'Ribbon Galaxy'
-  ];
-
   const state = {
     runtimeReady: false,
     mode: 'drops',
     qualityMode: 1,
     paletteIndex: 0,
-    selectedPaletteColorIndex: 0,
     layoutPending: false,
     layoutReason: 'boot',
     settings: {
@@ -39,7 +30,6 @@
       preset: 'balanced',
       qualityMode: 1,
       paletteIndex: 0,
-      selectedPaletteColorIndex: 0,
       mode: 'drops'
     },
     metrics: {
@@ -100,10 +90,7 @@
   }
 
   function normalizeMode(mode) {
-    if (mode === 'random') {
-      return 'randomPalette';
-    }
-    return mode === 'tine' || mode === 'randomPalette' || mode === 'randomFull' ? mode : 'drops';
+    return mode === 'tine' || mode === 'random' ? mode : 'drops';
   }
 
   function log(message, payload) {
@@ -147,9 +134,6 @@
       state.mode = normalizeMode(state.settings.mode);
       state.qualityMode = Number.isFinite(state.settings.qualityMode) ? state.settings.qualityMode : 1;
       state.paletteIndex = Number.isFinite(state.settings.paletteIndex) ? state.settings.paletteIndex : 0;
-      state.selectedPaletteColorIndex = Number.isFinite(state.settings.selectedPaletteColorIndex)
-        ? state.settings.selectedPaletteColorIndex
-        : 0;
     } catch (error) {
       console.warn('[runtime] failed to read settings', error);
     }
@@ -172,7 +156,6 @@
     state.settings.preset = el.presetSelect?.value || state.settings.preset;
     state.settings.qualityMode = state.qualityMode;
     state.settings.paletteIndex = state.paletteIndex;
-    state.settings.selectedPaletteColorIndex = state.selectedPaletteColorIndex;
     state.settings.mode = state.mode;
   }
 
@@ -204,15 +187,7 @@
     if (el.metricRender) el.metricRender.textContent = formatSize(state.metrics.renderWidth, state.metrics.renderHeight);
     if (el.metricDpr) el.metricDpr.textContent = state.metrics.dpr.toFixed(2);
     if (el.metricQuality) el.metricQuality.textContent = getQualityLevel(state.qualityMode).name;
-    if (el.metricMode) {
-      el.metricMode.textContent = state.mode === 'tine'
-        ? 'Tine'
-        : state.mode === 'randomPalette'
-          ? 'Random Palette'
-          : state.mode === 'randomFull'
-            ? 'Random Full'
-            : 'Drops';
-    }
+    if (el.metricMode) el.metricMode.textContent = state.mode === 'tine' ? 'Tine' : state.mode === 'random' ? 'Random' : 'Drops';
   }
 
   function updateSliderLabels() {
@@ -224,10 +199,6 @@
   function setQualityMode(mode, persist = true) {
     const nextMode = getQualityLevel(Number(mode)).id;
     state.qualityMode = nextMode;
-
-    if (el.qualitySelect) {
-      el.qualitySelect.value = String(nextMode);
-    }
 
     if (el.qualityButtons) {
       [...el.qualityButtons.querySelectorAll('button')].forEach(button => {
@@ -248,16 +219,11 @@
   function setMode(mode, persist = true) {
     state.mode = normalizeMode(mode);
 
-    if (el.modeSelect) {
-      el.modeSelect.value = state.mode;
-    }
-
     if (el.modeDrops) el.modeDrops.classList.toggle('btn-primary', state.mode === 'drops');
-    if (el.modeRandomPalette) el.modeRandomPalette.classList.toggle('btn-primary', state.mode === 'randomPalette');
-    if (el.modeRandomFull) el.modeRandomFull.classList.toggle('btn-primary', state.mode === 'randomFull');
+    if (el.modeRandom) el.modeRandom.classList.toggle('btn-primary', state.mode === 'random');
     if (el.modeTine) el.modeTine.classList.toggle('btn-primary', state.mode === 'tine');
 
-    const nativeMode = state.mode === 'tine' ? 1 : state.mode === 'randomPalette' ? 2 : state.mode === 'randomFull' ? 3 : 0;
+    const nativeMode = state.mode === 'tine' ? 1 : state.mode === 'random' ? 2 : 0;
     callNative('setInteractionMode', null, ['number'], [nativeMode]);
 
     if (persist) {
@@ -276,72 +242,9 @@
 
     el.statusText.textContent = state.mode === 'tine'
       ? 'Tine mode: click to carve'
-      : state.mode === 'randomPalette'
-        ? 'Random palette mode: click for random palette color and random radius'
-        : state.mode === 'randomFull'
-          ? 'Random full mode: click for random color and random radius'
+      : state.mode === 'random'
+        ? 'Random mode: click to place a random color drop'
         : 'Ready to create';
-  }
-
-  function decodePackedColor(packed) {
-    return {
-      r: (packed >>> 24) & 0xff,
-      g: (packed >>> 16) & 0xff,
-      b: (packed >>> 8) & 0xff,
-      a: packed & 0xff
-    };
-  }
-
-  function applySelectedPaletteColor() {
-    if (!hasNativeExport('getCurrentPaletteSize') || !hasNativeExport('getCurrentPaletteColor')) {
-      return;
-    }
-
-    const count = callNative('getCurrentPaletteSize', 'number', [], []) || 0;
-    if (count <= 0) {
-      state.selectedPaletteColorIndex = 0;
-      return;
-    }
-
-    if (state.selectedPaletteColorIndex >= count || state.selectedPaletteColorIndex < 0) {
-      state.selectedPaletteColorIndex = 0;
-    }
-
-    const packed = callNative('getCurrentPaletteColor', 'number', ['number'], [state.selectedPaletteColorIndex]);
-    const rgba = decodePackedColor(packed);
-    callNative('setNextDropColor', null, ['number', 'number', 'number', 'number'], [rgba.r, rgba.g, rgba.b, rgba.a]);
-  }
-
-  function rebuildPaletteSelect() {
-    if (!el.paletteSelect) {
-      return;
-    }
-
-    if (!hasNativeExport('getPaletteCount')) {
-      el.paletteSelect.innerHTML = '';
-      return;
-    }
-
-    const count = callNative('getPaletteCount', 'number', [], []) || 0;
-    if (count <= 0) {
-      el.paletteSelect.innerHTML = '';
-      state.paletteIndex = 0;
-      return;
-    }
-
-    if (state.paletteIndex < 0 || state.paletteIndex >= count) {
-      state.paletteIndex = 0;
-    }
-
-    el.paletteSelect.innerHTML = '';
-    for (let index = 0; index < count; index += 1) {
-      const option = document.createElement('option');
-      option.value = String(index);
-      option.textContent = `Palette ${index + 1}`;
-      el.paletteSelect.appendChild(option);
-    }
-
-    el.paletteSelect.value = String(state.paletteIndex);
   }
 
   function rebuildPaletteButtons() {
@@ -357,36 +260,33 @@
     el.paletteColors.innerHTML = '';
     const count = callNative('getCurrentPaletteSize', 'number', [], []) || 0;
 
-    if (count > 0 && (state.selectedPaletteColorIndex >= count || state.selectedPaletteColorIndex < 0)) {
-      state.selectedPaletteColorIndex = 0;
-    }
-
     for (let index = 0; index < count; index += 1) {
       const packed = callNative('getCurrentPaletteColor', 'number', ['number'], [index]);
-      const rgba = decodePackedColor(packed);
+      const r = (packed >>> 24) & 0xff;
+      const g = (packed >>> 16) & 0xff;
+      const b = (packed >>> 8) & 0xff;
+      const a = packed & 0xff;
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'palette-swatch';
-      button.style.background = `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${rgba.a / 255})`;
-      button.title = `RGB(${rgba.r}, ${rgba.g}, ${rgba.b})`;
+      button.style.background = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
+      button.title = `RGB(${r}, ${g}, ${b})`;
       button.addEventListener('click', () => {
-        state.selectedPaletteColorIndex = index;
-        applySelectedPaletteColor();
+        state.paletteIndex = index;
+        callNative('setPaletteIndex', null, ['number'], [index]);
         rebuildPaletteButtons();
         syncSettingsFromUi();
         writeSettings();
       });
-      if (index === state.selectedPaletteColorIndex) {
+      if (index === state.paletteIndex) {
         button.classList.add('selected');
       }
       el.paletteColors.appendChild(button);
     }
 
-    if (count > 0 && state.selectedPaletteColorIndex >= count) {
-      state.selectedPaletteColorIndex = 0;
+    if (count > 0 && state.paletteIndex >= count) {
+      state.paletteIndex = 0;
     }
-
-    applySelectedPaletteColor();
   }
 
   function applyPreset(presetId) {
@@ -396,7 +296,6 @@
     state.settings.radius = preset.radius;
     state.settings.strength = preset.strength;
     state.settings.sharpness = preset.sharpness;
-    state.selectedPaletteColorIndex = 0;
     state.mode = normalizeMode(preset.mode);
     state.qualityMode = preset.qualityMode;
 
@@ -411,7 +310,6 @@
     setMode(preset.mode, false);
     setQualityMode(preset.qualityMode, false);
     callNative('setPaletteIndex', null, ['number'], [preset.paletteIndex]);
-    rebuildPaletteSelect();
     callNative('setNextDropRadius', null, ['number'], [preset.radius]);
     rebuildPaletteButtons();
     updateSliderLabels();
@@ -540,40 +438,6 @@
     showToast('View reset', 'success');
   }
 
-  function triggerPatternBloom() {
-    if (!state.runtimeReady) {
-      showToast('Runtime is still loading', 'error');
-      return;
-    }
-
-    // Ensure native render metrics match current canvas size before generating.
-    syncLayout('pattern-bloom-pre');
-
-    if (!hasNativeExport('generatePatternBloom')) {
-      showToast('Pattern Bloom is not ready', 'error');
-      return;
-    }
-
-    const patternId = callNative('generatePatternBloom', 'number', [], []);
-    if (hasNativeExport('getCurrentPaletteIndex')) {
-      const paletteIndex = callNative('getCurrentPaletteIndex', 'number', [], []);
-      if (Number.isFinite(paletteIndex) && paletteIndex >= 0) {
-        state.paletteIndex = paletteIndex;
-      }
-    }
-
-    state.selectedPaletteColorIndex = 0;
-    rebuildPaletteSelect();
-    rebuildPaletteButtons();
-    syncSettingsFromUi();
-    writeSettings();
-    scheduleLayoutSync('pattern-bloom');
-
-    const safePatternId = Number.isFinite(patternId) ? patternId : 0;
-    const patternName = PATTERN_BLOOM_NAMES[((safePatternId % PATTERN_BLOOM_NAMES.length) + PATTERN_BLOOM_NAMES.length) % PATTERN_BLOOM_NAMES.length];
-    showToast(`Pattern Bloom: ${patternName}`, 'success');
-  }
-
   function toggleFullscreen() {
     const canvas = el.canvas;
     if (!canvas) {
@@ -602,22 +466,17 @@
 
   function attachEventHandlers() {
     el.modeDrops?.addEventListener('click', () => setMode('drops'));
-    el.modeRandomPalette?.addEventListener('click', () => setMode('randomPalette'));
-    el.modeRandomFull?.addEventListener('click', () => setMode('randomFull'));
+    el.modeRandom?.addEventListener('click', () => setMode('random'));
     el.modeTine?.addEventListener('click', () => setMode('tine'));
-    el.modeSelect?.addEventListener('change', () => setMode(el.modeSelect.value));
     el.clearButton?.addEventListener('click', clearCanvas);
     el.screenshotButton?.addEventListener('click', () => saveScreenshot());
     el.fullscreenButton?.addEventListener('click', toggleFullscreen);
     el.infoButton?.addEventListener('click', showInfo);
     el.resetViewButton?.addEventListener('click', resetView);
     el.fitCanvasButton?.addEventListener('click', fitCanvas);
-    el.patternBloomButton?.addEventListener('click', triggerPatternBloom);
     el.radiusSlider?.addEventListener('input', () => {
-      const radius = Math.min(120, Number.parseInt(el.radiusSlider.value, 10));
-      el.radiusSlider.value = String(radius);
       updateSliderLabels();
-      callNative('setNextDropRadius', null, ['number'], [radius]);
+      callNative('setNextDropRadius', null, ['number'], [Number.parseInt(el.radiusSlider.value, 10)]);
       syncSettingsFromUi();
       writeSettings();
     });
@@ -640,19 +499,9 @@
       writeSettings();
     });
     el.presetSelect?.addEventListener('change', () => applyPreset(el.presetSelect.value));
-    el.paletteSelect?.addEventListener('change', () => {
-      const nextIndex = Number.parseInt(el.paletteSelect.value, 10);
-      state.paletteIndex = Number.isFinite(nextIndex) ? nextIndex : 0;
-      state.selectedPaletteColorIndex = 0;
-      callNative('setPaletteIndex', null, ['number'], [state.paletteIndex]);
-      rebuildPaletteButtons();
-      syncSettingsFromUi();
-      writeSettings();
-    });
     el.qualityButtons?.querySelectorAll('button').forEach(button => {
       button.addEventListener('click', () => setQualityMode(Number(button.dataset.mode)));
     });
-    el.qualitySelect?.addEventListener('change', () => setQualityMode(Number(el.qualitySelect.value)));
     el.paletteColors?.addEventListener('contextmenu', event => event.preventDefault());
 
     window.addEventListener('resize', () => scheduleLayoutSync('window-resize'));
@@ -729,7 +578,6 @@
 
       state.runtimeReady = true;
       hideLoading();
-      rebuildPaletteSelect();
       rebuildPaletteButtons();
       syncSettingsFromUi();
       applySettingsToRuntime();
@@ -746,15 +594,10 @@
   }
 
   function applySettingsToRuntime() {
-    const radius = Math.min(120, Number.parseInt(el.radiusSlider?.value || '80', 10));
-    if (el.radiusSlider) {
-      el.radiusSlider.value = String(radius);
-    }
-    callNative('setNextDropRadius', null, ['number'], [radius]);
+    callNative('setNextDropRadius', null, ['number'], [Number.parseInt(el.radiusSlider?.value || '80', 10)]);
     callNative('setPaletteIndex', null, ['number'], [state.paletteIndex]);
-    callNative('setInteractionMode', null, ['number'], [state.mode === 'tine' ? 1 : state.mode === 'randomPalette' ? 2 : state.mode === 'randomFull' ? 3 : 0]);
+    callNative('setInteractionMode', null, ['number'], [state.mode === 'tine' ? 1 : state.mode === 'random' ? 2 : 0]);
     callNative('setQualityMode', null, ['number'], [state.qualityMode]);
-    rebuildPaletteSelect();
     rebuildPaletteButtons();
     updateMetricsPanel();
   }
@@ -767,27 +610,22 @@
     el.toastMessage = byId('toast-message');
     el.toastIcon = el.toast?.querySelector('i') || null;
     el.modeDrops = byId('modeDrops');
-    el.modeRandomPalette = byId('modeRandomPalette');
-    el.modeRandomFull = byId('modeRandomFull');
+    el.modeRandom = byId('modeRandom');
     el.modeTine = byId('modeTine');
-    el.modeSelect = byId('modeSelect');
     el.clearButton = byId('clearButton');
     el.screenshotButton = byId('screenshotButton');
     el.fullscreenButton = byId('fullscreenButton');
     el.infoButton = byId('infoButton');
     el.resetViewButton = byId('resetViewButton');
     el.fitCanvasButton = byId('fitCanvasButton');
-    el.patternBloomButton = byId('patternBloomButton');
     el.strengthSlider = byId('strengthSlider');
     el.sharpnessSlider = byId('sharpnessSlider');
     el.radiusSlider = byId('radiusSlider');
     el.strengthValue = byId('strengthVal');
     el.sharpnessValue = byId('sharpnessVal');
     el.radiusValue = byId('radiusVal');
-    el.paletteSelect = byId('paletteSelect');
     el.paletteColors = byId('paletteColors');
     el.qualityButtons = byId('qualityButtons');
-    el.qualitySelect = byId('qualitySelect');
     el.presetSelect = byId('presetSelect');
     el.exportPrefix = byId('exportPrefix');
     el.exportTimestamp = byId('exportTimestamp');
@@ -840,7 +678,6 @@
     window.setMode = setMode;
     window.fitCanvas = fitCanvas;
     window.resetView = resetView;
-    window.triggerPatternBloom = triggerPatternBloom;
   }
 
   if (document.readyState === 'loading') {

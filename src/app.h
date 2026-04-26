@@ -8,21 +8,6 @@
 #include <string>
 #include <vector>
 
-struct PatternDropSeed
-{
-    float x = 0.0f;
-    float y = 0.0f;
-    float radius = 8.0f;
-    color baseColor;
-    color targetColor;
-    float targetBlend = 0.4f;
-
-    PatternDropSeed()
-        : baseColor(255, 255, 255, 255), targetColor(255, 255, 255, 255)
-    {
-    }
-};
-
 enum class QualityMode
 {
     Performance = 0,
@@ -59,10 +44,8 @@ public:
 
     int GetCurrentPaletteSize() const;
     int GetCurrentPaletteColor(int index) const;
-    int GetCurrentPaletteIndex() const;
     int GetPaletteCount() const;
     void SetPaletteIndex(int index);
-    int GeneratePatternBloom();
 
     void SetQualityMode(int mode);
     int GetQualityMode() const;
@@ -76,7 +59,6 @@ private:
     void UpdateDrops();
     void UpdateAdaptiveVertexCount(float fps);
     void EnsureDefaultNextDropColor();
-    void ProcessPatternBloomQueue();
     void LogCanvasMetrics(const char* reason) const;
     static QualityMode ClampQualityMode(int mode);
     static float QualityScaleForMode(QualityMode mode);
@@ -90,10 +72,6 @@ private:
     int currentN = 200;
     int interactionMode = 0;
     int nextDropRadius = 80;
-    int patternCycleIndex = 0;
-    std::vector<PatternDropSeed> patternQueue;
-    size_t patternQueueCursor = 0;
-    double nextPatternEmitTime = 0.0;
     color nextDropColor;
     QualityMode qualityMode = QualityMode::Balanced;
 };
